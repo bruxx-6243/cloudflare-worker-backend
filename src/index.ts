@@ -1,15 +1,8 @@
 import { headers } from '@/lib/config';
-import * as schema from '@/lib/db/schema';
 
 import routes from '@/lib/api/routes';
+import { createDb } from '@/lib/db';
 import { AppContext } from '@/types';
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-
-function createDb(databaseUrl: string) {
-	const sql = neon(databaseUrl);
-	return drizzle(sql, { schema });
-}
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
