@@ -1,6 +1,6 @@
 import { requestLogsTable } from '@/lib/db/schema';
 import { validateIp } from '@/lib/utilis';
-import { DB, Route } from '@/types';
+import { AppContext, Route } from '@/types';
 
 type GeoData = {
 	network: { ip: string; datacenter: string; dns: string };
@@ -70,9 +70,9 @@ const extractNetworkInfo = (headers: Headers): GeoData['network'] => {
 	};
 };
 
-const logRequest = async (db: DB, network: GeoData['network'], device: DeviceInfo, location: GeoData['location']) => {
+const logRequest = async (ctx: AppContext, network: GeoData['network'], device: DeviceInfo, location: GeoData['location']) => {
 	try {
-		const [logEntry] = await db
+		const [logEntry] = await ctx.db
 			.insert(requestLogsTable)
 			.values({
 				timestamp: new Date(),
@@ -103,10 +103,10 @@ const createResponse = (data: GeoData, logId: string) =>
 		},
 	});
 
-const indexRoute: Route = {
-	path: '/',
+const RequestLogRoute: Route = {
+	path: '/request-log',
 	method: 'GET',
-	handler: async (request, { db }) => {
+	handler: async (request, ctx) => {
 		try {
 			const headers = request.headers;
 			const cf = (request.cf as CloudflareData) ?? {};
@@ -126,7 +126,7 @@ const indexRoute: Route = {
 			};
 
 			const responseData: GeoData = { network: networkInfo, device: deviceInfo, location: locationInfo };
-			const logId = await logRequest(db, networkInfo, deviceInfo, locationInfo);
+			const logId = await logRequest(ctx, networkInfo, deviceInfo, locationInfo);
 
 			return createResponse(responseData, logId);
 		} catch (error) {
@@ -139,4 +139,4 @@ const indexRoute: Route = {
 	},
 };
 
-export const indexRouter = { route: indexRoute };
+export const requestLogRoute = { route: RequestLogRoute };

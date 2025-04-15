@@ -1,7 +1,4 @@
+import { requestLogRoute } from '@/lib/api/routes/logs.route';
 import { Route } from '@/types';
-import { indexRouter } from './index.route';
-import { tasksRouter } from './task.route';
 
-const routes: Array<{ route: Route }> = [tasksRouter, indexRouter];
-
-export default routes;
+export default [requestLogRoute] as Array<{ route: Route }>;

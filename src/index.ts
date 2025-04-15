@@ -4,6 +4,7 @@ import * as schema from '@/lib/db/schema';
 import routes from '@/lib/api/routes';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
+import { AppContext } from '@/types';
 
 function createDb(databaseUrl: string) {
 	const sql = neon(databaseUrl);
@@ -12,6 +13,10 @@ function createDb(databaseUrl: string) {
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+	const appContext: AppContext = {
+		db: createDb(env.DATABASE_URL),
+	};
+
 		if (request.method === 'OPTIONS') {
 			return new Response(null, { headers });
 		}
@@ -32,7 +37,7 @@ export default {
 		}
 
 		try {
-			return await route.route.handler(request, { db });
+			return await route.route.handler(request, appContext);
 		} catch (error) {
 			return new Response(
 				JSON.stringify({
