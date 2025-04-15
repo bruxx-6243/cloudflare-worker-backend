@@ -7,13 +7,13 @@ export const tasksTable = pgTable('tasks', {
 });
 
 export const requestLogsTable = pgTable('request_logs', {
-	id: uuid('id').primaryKey().defaultRandom(), // UUID primary key
-	timestamp: timestamp('timestamp').notNull(), // ISO timestamp
-	ip: varchar('ip', { length: 45 }).notNull(), // IPv4/IPv6
-	userAgent: varchar('user_agent', { length: 512 }).notNull(), // Full user agent string
-	country: varchar('country', { length: 100 }).notNull(), // Country name/code
-	browser: varchar('browser', { length: 50 }).notNull(), // Browser name
-	os: varchar('os', { length: 50 }).notNull(), // Operating system
-	deviceType: varchar('device_type', { length: 50 }).notNull(), // Device type (Mobile, Desktop, etc.)
-	device: varchar('device', { length: 50 }).notNull(), // Alias for device type
+	id: uuid('id').primaryKey().defaultRandom(),
+	timestamp: timestamp('timestamp').notNull(),
+	ip: varchar('ip', { length: 45 }).notNull(),
+	userAgent: varchar('user_agent', { length: 512 }).notNull(),
+	country: varchar('country', { length: 100 }).notNull(),
+	browser: varchar('browser', { length: 50 }).notNull(),
+	os: varchar('os', { length: 50 }).notNull(),
+	deviceType: varchar('device_type', { length: 50 }).notNull(),
+	device: varchar('device', { length: 50 }).notNull(),
 });

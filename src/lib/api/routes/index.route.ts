@@ -1,6 +1,6 @@
 import { requestLogsTable } from '@/lib/db/schema';
 import { validateIp } from '@/lib/utilis';
-import { Route } from '@/types';
+import { DB, Route } from '@/types';
 
 type GeoData = {
 	network: { ip: string; datacenter: string; dns: string };
@@ -70,7 +70,7 @@ const extractNetworkInfo = (headers: Headers): GeoData['network'] => {
 	};
 };
 
-const logRequest = async (db: any, network: GeoData['network'], device: DeviceInfo, location: GeoData['location']) => {
+const logRequest = async (db: DB, network: GeoData['network'], device: DeviceInfo, location: GeoData['location']) => {
 	try {
 		const [logEntry] = await db
 			.insert(requestLogsTable)
