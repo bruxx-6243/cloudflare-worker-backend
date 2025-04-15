@@ -1,10 +1,4 @@
-import { boolean, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-
-export const tasksTable = pgTable('tasks', {
-	is_completed: boolean().notNull(),
-	title: varchar({ length: 255 }).notNull(),
-	id: uuid('id').primaryKey().defaultRandom(),
-});
+import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export const requestLogsTable = pgTable('request_logs', {
 	id: uuid('id').primaryKey().defaultRandom(),
