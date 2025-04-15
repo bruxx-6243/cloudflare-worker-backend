@@ -2,9 +2,9 @@ import { headers } from '@/lib/config';
 import * as schema from '@/lib/db/schema';
 
 import routes from '@/lib/api/routes';
+import { AppContext } from '@/types';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { AppContext } from '@/types';
 
 function createDb(databaseUrl: string) {
 	const sql = neon(databaseUrl);
@@ -12,16 +12,14 @@ function createDb(databaseUrl: string) {
 }
 
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-	const appContext: AppContext = {
-		db: createDb(env.DATABASE_URL),
-	};
+	async fetch(request: Request, env: Env): Promise<Response> {
+		const appContext: AppContext = {
+			db: createDb(env.DATABASE_URL),
+		};
 
 		if (request.method === 'OPTIONS') {
 			return new Response(null, { headers });
 		}
-
-		const db = createDb(env.DATABASE_URL);
 
 		const url = new URL(request.url);
 		const pathname = url.pathname;
