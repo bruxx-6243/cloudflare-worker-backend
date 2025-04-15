@@ -1,18 +1,45 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { headers } from '@/lib/config';
+import * as schema from '@/lib/db/schema';
+
+import routes from '@/lib/api/routes';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+
+function createDb(databaseUrl: string) {
+	const sql = neon(databaseUrl);
+	return drizzle(sql, { schema });
+}
 
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response(JSON.stringify({ name: 'Fariol Blondeau' }));
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		if (request.method === 'OPTIONS') {
+			return new Response(null, { headers });
+		}
+
+		const db = createDb(env.DATABASE_URL);
+
+		const url = new URL(request.url);
+		const pathname = url.pathname;
+		const method = request.method.toUpperCase();
+
+		const route = routes.find((r) => r.route.path === pathname && r.route.method === method);
+
+		if (!route) {
+			return new Response(JSON.stringify({ error: 'Not found' }), {
+				status: 404,
+				headers,
+			});
+		}
+
+		try {
+			return await route.route.handler(request, { db });
+		} catch (error) {
+			return new Response(
+				JSON.stringify({
+					error: `Internal error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+				}),
+				{ status: 500, headers }
+			);
+		}
 	},
 } satisfies ExportedHandler<Env>;
