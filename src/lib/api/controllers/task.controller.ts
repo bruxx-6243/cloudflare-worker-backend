@@ -19,7 +19,7 @@ export default class TaskController extends BaseController {
 		}
 	}
 
-	async getTaskById(db: DB, id: number): Promise<Task | null> {
+	async getTaskById(db: DB, id: string): Promise<Task | null> {
 		try {
 			const task = await db.select().from(tasksTable).where(eq(tasksTable.id, id)).limit(1);
 
