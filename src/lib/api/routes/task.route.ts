@@ -28,6 +28,4 @@ const createTaskRoute: Route = {
 	},
 };
 
-export const tasksRouter = {
-	route: createTaskRoute,
-};
+export const tasksRouter = { route: createTaskRoute };
