@@ -8,6 +8,7 @@ export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const appContext: AppContext = {
 			db: createDb(env.DATABASE_URL),
+			env,
 		};
 
 		if (request.method === 'OPTIONS') {

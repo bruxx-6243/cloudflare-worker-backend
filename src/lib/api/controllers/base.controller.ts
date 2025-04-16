@@ -1,12 +1,27 @@
 import ApiError from '@/lib/api/handlers/api-error';
 
 export default class BaseController {
-	protected handleError(error: unknown) {
+	protected handleError(error: unknown): Response {
+		let status = 500;
+		let message = 'Internal Server Error';
+
 		if (error instanceof ApiError) {
-			console.error(error.message);
+			status = error.statusCode;
+			message = error.message;
+		} else if (error instanceof Error) {
+			console.error('Unexpected error:', error.message, error.stack);
+		} else {
+			console.error('Unknown error:', error);
 		}
 
-		throw error;
+		if (error instanceof ApiError || error instanceof Error) {
+			console.error(`Error [${status}]: ${message}`);
+		}
+
+		return new Response(JSON.stringify({ error: message }), {
+			status,
+			headers: { 'Content-Type': 'application/json' },
+		});
 	}
 
 	constructor() {

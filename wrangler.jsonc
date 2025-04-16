@@ -6,5 +6,5 @@
 	"observability": {
 		"enabled": true
 	},
-	"vars": {}
+	"compatibility_flags": ["nodejs_compat"]
 }

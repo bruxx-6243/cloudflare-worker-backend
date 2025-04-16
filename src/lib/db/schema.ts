@@ -11,3 +11,11 @@ export const requestLogsTable = pgTable('request_logs', {
 	deviceType: varchar('device_type', { length: 50 }).notNull(),
 	device: varchar('device', { length: 50 }).notNull(),
 });
+
+export const usersTable = pgTable('users', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	email: varchar('email', { length: 255 }).notNull().unique(),
+	password: varchar('password', { length: 255 }).notNull(),
+	createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
