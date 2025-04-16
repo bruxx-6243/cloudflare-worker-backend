@@ -104,7 +104,7 @@ const createResponse = (data: GeoData, logId: string) =>
 	});
 
 const RequestLogRoute: Route = {
-	path: '/request-log',
+	path: '/log',
 	method: 'GET',
 	handler: async (request, ctx) => {
 		try {
