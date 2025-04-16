@@ -6,7 +6,5 @@
 	"observability": {
 		"enabled": true
 	},
-	"vars": {
-		"DATABASE_URL": "postgresql://worker_owner:npg_kLFxlIsqD48i@ep-shrill-queen-a45r7ofd-pooler.us-east-1.aws.neon.tech/worker?sslmode=require"
-	}
+	"vars": {}
 }
