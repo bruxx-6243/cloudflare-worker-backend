@@ -103,7 +103,7 @@ const createResponse = (data: GeoData, logId: string) =>
 		},
 	});
 
-const RequestLogRoute: Route = {
+const LogRoute: Route = {
 	path: '/log',
 	method: 'GET',
 	handler: async (request, ctx) => {
@@ -139,4 +139,4 @@ const RequestLogRoute: Route = {
 	},
 };
 
-export const requestLogRoute = { route: RequestLogRoute };
+export const logRoute = { route: LogRoute };
