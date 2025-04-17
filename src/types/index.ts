@@ -14,10 +14,20 @@ export type AppContext = {
 	env: Env;
 };
 
+export type SessionContext = {
+	session: {
+		userId: string;
+		email: string;
+		[key: string]: string;
+	};
+} & AppContext;
+
+export type Handler<T extends AppContext = AppContext> = (req: Request, ctx: T) => Response | Promise<Response>;
+
 export type Route = {
 	path: string;
 	method: method;
-	handler: (req: Request, ctx: AppContext) => Promise<Response>;
+	handler: Handler;
 };
 export const loginSchema = z.object({
 	email: z.string().email(),
@@ -26,4 +36,3 @@ export const loginSchema = z.object({
 
 export type User = typeof schema.usersTable.$inferSelect;
 export type LoginType = z.infer<typeof loginSchema>;
-

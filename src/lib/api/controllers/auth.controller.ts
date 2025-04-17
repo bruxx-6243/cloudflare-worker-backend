@@ -1,12 +1,12 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { usersTable } from '@/lib/db/schema';
-import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/utilis';
-import { AppContext, loginSchema } from '@/types';
+import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/session';
+import { AppContext, loginSchema, SessionContext } from '@/types';
 import { hash } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 
 export default class AuthController extends BaseController {
-	async login(request: Request, ctx: AppContext) {
+	async login(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const data = await request.json();
 
@@ -53,8 +53,7 @@ export default class AuthController extends BaseController {
 			});
 		}
 	}
-
-	async register(request: Request, ctx: AppContext) {
+	async register(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const data = await request.json();
 
@@ -96,6 +95,32 @@ export default class AuthController extends BaseController {
 			});
 		}
 	}
+
+	async profile(request: Request, ctx: SessionContext): Promise<Response> {
+		try {
+			const userId = ctx.session.userId;
+
+			const [user] = await ctx.db.select().from(usersTable).where(eq(usersTable.id, userId));
+
+			if (!user) {
+				return new Response(JSON.stringify({ error: 'User not found' }), {
+					status: 404,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			return new Response(JSON.stringify({ email: user.email }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		} catch (error) {
+			console.error('Profile error:', error);
+			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+				status: 500,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+	}
 }
 
-export const { login, register } = new AuthController();
+export const { login, register, profile } = new AuthController();
