@@ -1,5 +1,5 @@
 import { loginRouter, profileRouter, registerRouter } from '@/lib/api/routes/auth.route';
-import { logRoute } from '@/lib/api/routes/logs.route';
+import { logRouter } from '@/lib/api/routes/logs.route';
 import { Route } from '@/types';
 
 const indexRoute: Route = {
@@ -13,4 +13,4 @@ const indexRoute: Route = {
 	},
 };
 
-export default [{ route: indexRoute }, logRoute, loginRouter, registerRouter, profileRouter] as Array<{ route: Route }>;
+export default [{ route: indexRoute }, logRouter, loginRouter, registerRouter, profileRouter] as Array<{ route: Route }>;
