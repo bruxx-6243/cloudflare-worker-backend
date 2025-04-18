@@ -1,22 +1,20 @@
-import { User } from '@/types';
+import type { User } from '@/types';
 import { compare } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const TOKEN_DURATION = 1000 * 60 * 60 * 1;
 
-type SessionPayload = {
-	userId: string;
-	email: string;
+export type SessionPayload = {
+	user: Omit<User, 'password'>;
 	iat?: number;
 	exp?: number;
 	[key: string]: any;
 };
-
 export async function verifySession(token: string, secret: string): Promise<SessionPayload> {
 	try {
 		const decoded = jwt.verify(token, secret) as SessionPayload;
 
-		if (!decoded.userId) {
+		if (!decoded.user.id) {
 			throw new Error('Invalid session: Missing userId');
 		}
 
@@ -37,10 +35,9 @@ export async function verifyPassword(password: string, passwordHash: string) {
 }
 
 export function signJWT(user: User, secret: string) {
-	const { password, ...userWithoutPassword } = user;
+	const { password, ...rest } = user;
 
-	user = userWithoutPassword as User;
-	const token = jwt.sign({ user }, secret, {
+	const token = jwt.sign({ user: rest }, secret, {
 		expiresIn: TOKEN_DURATION,
 	});
 

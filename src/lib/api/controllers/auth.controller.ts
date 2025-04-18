@@ -1,7 +1,8 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { usersTable } from '@/lib/db/schema';
 import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/session';
-import { AppContext, loginSchema, registerSchema, SessionContext, StatusType } from '@/types';
+import { AppContext, SessionContext } from '@/types';
+import { loginSchema, registerSchema } from '@/types/schemas';
 import { hash } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 
@@ -114,7 +115,7 @@ export default class AuthController extends BaseController {
 
 	async profile(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
-			const userId = ctx.session.userId;
+			const userId = ctx.session.user.id;
 
 			const [user] = await ctx.db.select().from(usersTable).where(eq(usersTable.id, userId));
 
@@ -125,7 +126,9 @@ export default class AuthController extends BaseController {
 				});
 			}
 
-			return new Response(JSON.stringify({ email: user.email }), {
+			const { password, ...rest } = user;
+
+			return new Response(JSON.stringify({ user: rest }), {
 				status: 200,
 				headers: { 'Content-Type': 'application/json' },
 			});
