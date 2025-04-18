@@ -27,31 +27,3 @@ export const usersTable = pgTable('users', {
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
-
-export const rolesTable = pgTable('roles', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	name: varchar('name', { length: 255 }).notNull().unique(),
-});
-
-export const permissionsTable = pgTable('permissions', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	name: varchar('name', { length: 255 }).notNull().unique(),
-});
-
-export const rolePermissionsTable = pgTable('role_permissions', {
-	roleId: uuid('role_id')
-		.notNull()
-		.references(() => rolesTable.id),
-	permissionId: uuid('permission_id')
-		.notNull()
-		.references(() => permissionsTable.id),
-});
-
-export const userRolesTable = pgTable('user_roles', {
-	userId: uuid('user_id')
-		.notNull()
-		.references(() => usersTable.id),
-	roleId: uuid('role_id')
-		.notNull()
-		.references(() => rolesTable.id),
-});
