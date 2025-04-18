@@ -10,7 +10,6 @@ export default class AuthController extends BaseController {
 	async login(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const data = await request.json();
-
 			const validateData = loginSchema.safeParse(data);
 
 			if (!validateData.success) {
