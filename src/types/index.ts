@@ -34,5 +34,5 @@ export const loginSchema = z.object({
 	password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
 });
 
-export type User = typeof schema.usersTable.$inferSelect;
+export type User = Omit<typeof schema.usersTable.$inferSelect, 'id'>;
 export type LoginType = z.infer<typeof loginSchema>;

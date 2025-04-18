@@ -1,5 +1,5 @@
 import { login, profile, register } from '@/lib/api/controllers/auth.controller';
-import authMiddleware from '@/middlewares/auth.middleware';
+import { authMiddleware } from '@/middlewares';
 import { Route } from '@/types';
 
 const loginRoute: Route = {

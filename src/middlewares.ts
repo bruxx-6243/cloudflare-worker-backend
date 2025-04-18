@@ -1,7 +1,7 @@
 import { verifySession } from '@/lib/session';
 import { AppContext, Handler, SessionContext } from '@/types';
 
-export default function authMiddleware(handler: Handler<SessionContext>): Handler<AppContext> {
+export function authMiddleware(handler: Handler<SessionContext>): Handler<AppContext> {
 	return async (req: Request, ctx: AppContext): Promise<Response> => {
 		try {
 			const cookieHeader = req.headers.get('Cookie');
