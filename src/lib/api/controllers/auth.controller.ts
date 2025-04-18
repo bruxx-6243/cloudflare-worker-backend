@@ -1,7 +1,7 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { usersTable } from '@/lib/db/schema';
 import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/session';
-import { AppContext, loginSchema, SessionContext } from '@/types';
+import { AppContext, loginSchema, registerSchema, SessionContext, StatusType } from '@/types';
 import { hash } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 
@@ -56,18 +56,27 @@ export default class AuthController extends BaseController {
 	async register(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const data = await request.json();
-			const validateData = loginSchema.safeParse(data);
+			const validateData = registerSchema.safeParse(data);
 
 			if (!validateData.success) {
-				return new Response(JSON.stringify({ error: 'Invalid data' }), {
-					status: 400,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return new Response(
+					JSON.stringify({
+						error: 'Validation failed',
+						details: validateData.error.errors.map((err) => ({
+							path: err.path.join('.'),
+							message: err.message,
+						})),
+					}),
+					{
+						status: 400,
+						headers: { 'Content-Type': 'application/json' },
+					}
+				);
 			}
 
-			const { email, password } = validateData.data;
+			const validData = validateData.data;
 
-			const [existingUser] = await ctx.db.select().from(usersTable).where(eq(usersTable.email, email));
+			const [existingUser] = await ctx.db.select().from(usersTable).where(eq(usersTable.email, validData.email));
 
 			if (existingUser) {
 				return new Response(JSON.stringify({ error: 'User already exists' }), {
@@ -76,9 +85,17 @@ export default class AuthController extends BaseController {
 				});
 			}
 
-			const hashedPassword = await hash(password, 10);
+			const hashedPassword = await hash(validData.password, 10);
 
-			const [user] = await ctx.db.insert(usersTable).values({ email, password: hashedPassword }).returning();
+			const values = {
+				email: validData.email,
+				password: hashedPassword,
+				lastName: validData.lastName,
+				userName: validData.userName,
+				firstName: validData.firstName,
+			};
+
+			const [user] = await ctx.db.insert(usersTable).values(values).returning();
 
 			const token = signJWT(user, ctx.env.JWT_SECRET);
 

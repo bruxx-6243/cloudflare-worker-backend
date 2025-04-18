@@ -29,6 +29,20 @@
       "when": 1744789191920,
       "tag": "0003_luxuriant_medusa",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1744971357015,
+      "tag": "0004_real_talos",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1744972104193,
+      "tag": "0005_powerful_morlun",
+      "breakpoints": true
     }
   ]
 }

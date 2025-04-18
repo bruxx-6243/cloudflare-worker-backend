@@ -37,7 +37,10 @@ export async function verifyPassword(password: string, passwordHash: string) {
 }
 
 export function signJWT(user: User, secret: string) {
-	const token = jwt.sign({ userId: user.id, email: user.email }, secret, {
+	const { password, ...userWithoutPassword } = user;
+
+	user = userWithoutPassword as User;
+	const token = jwt.sign({ user }, secret, {
 		expiresIn: TOKEN_DURATION,
 	});
 
