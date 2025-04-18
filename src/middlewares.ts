@@ -9,6 +9,7 @@ export function authMiddleware(handler: Handler<SessionContext>): Handler<AppCon
 				?.split(';')
 				.find((c) => c.trim().startsWith('session='))
 				?.split('=')[1];
+
 			const token = req.headers.get('Authorization')?.replace('Bearer ', '') ?? sessionCookie;
 
 			if (!token) {
