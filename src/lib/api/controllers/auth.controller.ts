@@ -3,6 +3,7 @@ import { usersTable } from '@/lib/db/schema';
 import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/session';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
+
 import { hash } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 
