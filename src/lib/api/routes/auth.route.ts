@@ -2,32 +2,26 @@ import { login, profile, register } from '@/lib/api/controllers/auth.controller'
 import { authMiddleware } from '@/middlewares';
 import { Route } from '@/types';
 
-const loginRoute: Route = {
-	path: '/auth/login',
-	method: 'POST',
-	handler: login,
-};
-
-const registerRoute: Route = {
-	path: '/auth/register',
-	method: 'POST',
-	handler: register,
-};
-
-const profileRoute: Route = {
-	path: '/auth/profile',
-	method: 'GET',
-	handler: authMiddleware(profile),
-};
-
 export const loginRouter = {
-	route: loginRoute,
+	route: {
+		path: '/auth/login',
+		method: 'POST',
+		handler: login,
+	} satisfies Route,
 };
 
 export const registerRouter = {
-	route: registerRoute,
+	route: {
+		path: '/auth/register',
+		method: 'POST',
+		handler: register,
+	} satisfies Route,
 };
 
 export const profileRouter = {
-	route: profileRoute,
+	route: {
+		path: '/auth/profile',
+		method: 'GET',
+		handler: authMiddleware(profile),
+	} satisfies Route,
 };

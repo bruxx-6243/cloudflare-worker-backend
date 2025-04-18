@@ -57,6 +57,8 @@ export default class AuthController extends BaseController {
 		try {
 			const data = await request.json();
 
+			console.log(data); // Agrega esta línea para verificar los datos recibidos en el consol
+
 			const validateData = loginSchema.safeParse(data);
 
 			if (!validateData.success) {
