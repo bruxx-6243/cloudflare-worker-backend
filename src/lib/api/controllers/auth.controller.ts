@@ -41,8 +41,9 @@ export default class AuthController extends BaseController {
 			}
 
 			const token = signJWT(user, ctx.env.JWT_SECRET);
+			const { password: _, ...rest } = user;
 
-			return new Response(JSON.stringify({ token, userId: user.id, expiresIn: TOKEN_DURATION }), {
+			return new Response(JSON.stringify({ token, user: rest, expires_in: TOKEN_DURATION }), {
 				status: 200,
 				headers: { 'Content-Type': 'application/json' },
 			});
@@ -99,8 +100,9 @@ export default class AuthController extends BaseController {
 			const [user] = await ctx.db.insert(usersTable).values(values).returning();
 
 			const token = signJWT(user, ctx.env.JWT_SECRET);
+			const { password, ...rest } = user;
 
-			return new Response(JSON.stringify({ userId: user.id, token, message: 'User registered' }), {
+			return new Response(JSON.stringify({ user: rest, token, message: 'User registered' }), {
 				status: 201,
 				headers: { 'Content-Type': 'application/json' },
 			});
