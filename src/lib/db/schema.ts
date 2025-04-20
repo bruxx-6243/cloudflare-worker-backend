@@ -27,3 +27,16 @@ export const usersTable = pgTable('users', {
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
+
+export const apiKeysTable = pgTable('api_keys', {
+	id: uuid('id').primaryKey().defaultRandom(),
+
+	userId: uuid('user_id')
+		.notNull()
+		.references(() => usersTable.id, { onDelete: 'cascade' }),
+	key: varchar('key', { length: 255 }).notNull().unique(),
+	secret: varchar('secret', { length: 255 }).notNull().unique(),
+
+	createdAt: timestamp('created_at').notNull().defaultNow(),
+	expiresAt: timestamp('expires_at').notNull(),
+});
