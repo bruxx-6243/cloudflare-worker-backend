@@ -2,26 +2,33 @@ import { login, profile, register } from '@/lib/api/controllers/auth.controller'
 import { authMiddleware } from '@/middlewares';
 import { Route } from '@/types';
 
+function withAuthPrefix<T extends Route>(route: Omit<T, 'path'> & { path: string }): T {
+	return {
+		...route,
+		path: `/auth${route.path.startsWith('/') ? '' : '/'}${route.path}`,
+	} as T;
+}
+
 export const loginRouter = {
-	route: {
-		path: '/auth/login',
+	route: withAuthPrefix({
+		path: 'login',
 		method: 'POST',
 		handler: login,
-	} satisfies Route,
+	}),
 };
 
 export const registerRouter = {
-	route: {
-		path: '/auth/register',
+	route: withAuthPrefix({
+		path: 'register',
 		method: 'POST',
 		handler: register,
-	} satisfies Route,
+	}),
 };
 
 export const profileRouter = {
-	route: {
-		path: '/auth/profile',
+	route: withAuthPrefix({
+		path: 'profile',
 		method: 'GET',
 		handler: authMiddleware(profile),
-	} satisfies Route,
+	}),
 };

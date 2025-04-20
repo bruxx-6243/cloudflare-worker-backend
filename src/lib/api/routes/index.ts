@@ -6,17 +6,29 @@ import { Route } from '@/types';
 // Just for testing purposes
 import { testRouter } from './test';
 
-const indexRoute: Route = {
-	path: '/',
-	method: 'GET',
-	handler: async () => {
-		return new Response(JSON.stringify({ message: 'Hello World!' }), {
-			status: 200,
-			headers: { 'Content-Type': 'application/json' },
-		});
+const indexRoute: { route: Route } = {
+	route: {
+		path: '/',
+		method: 'GET',
+		handler: async () => {
+			return new Response(JSON.stringify({ message: 'Hello World!' }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		},
 	},
 };
 
-export default [{ route: indexRoute }, testRouter, logRouter, loginRouter, registerRouter, profileRouter, apiKeyAndSecretRouter] as Array<{
-	route: Route;
-}>;
+function withApiPrefix<T extends { route: Route }>(router: T): T {
+	return {
+		...router,
+		route: {
+			...router.route,
+			path: `/api${router.route.path.startsWith('/') ? '' : '/'}${router.route.path}`,
+		},
+	};
+}
+
+const routes = [testRouter, logRouter, loginRouter, registerRouter, profileRouter, apiKeyAndSecretRouter];
+
+export default [indexRoute, ...routes.map(withApiPrefix)];

@@ -3,7 +3,7 @@ import { Route, SessionContext } from '@/types';
 
 export const testRouter = {
 	route: {
-		path: '/api/test',
+		path: '/test',
 		method: 'GET',
 		handler: protectedAuthMiddleware((request: Request, ctx: SessionContext) => {
 			const userId = ctx.session.user.id;
