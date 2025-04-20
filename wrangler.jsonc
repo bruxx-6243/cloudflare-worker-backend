@@ -6,5 +6,9 @@
 	"observability": {
 		"enabled": true
 	},
-	"compatibility_flags": ["nodejs_compat"]
+	"compatibility_flags": ["nodejs_compat"],
+	"vars": {
+		"LOGIN_TEMPLATE": "EFB5N3P7KZMPP2GRNWHBRGYKAX8N",
+		"REGISTER_TEMPLATE": "2A3394J6914QEBG2F33N78E3Z2XV"
+	}
 }
