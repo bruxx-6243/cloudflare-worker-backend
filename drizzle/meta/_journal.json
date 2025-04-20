@@ -50,6 +50,20 @@
       "when": 1744985078493,
       "tag": "0006_glorious_deadpool",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1745133569190,
+      "tag": "0007_funny_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1745134867131,
+      "tag": "0008_yellow_toad_men",
+      "breakpoints": true
     }
   ]
 }

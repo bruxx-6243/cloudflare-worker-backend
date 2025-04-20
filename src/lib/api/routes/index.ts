@@ -1,6 +1,10 @@
+import { apiKeyAndSecretRouter } from '@/lib/api/routes/api-key.route';
 import { loginRouter, profileRouter, registerRouter } from '@/lib/api/routes/auth.route';
 import { logRouter } from '@/lib/api/routes/logs.route';
 import { Route } from '@/types';
+
+// Just for testing purposes
+import { testRouter } from './test';
 
 const indexRoute: Route = {
 	path: '/',
@@ -13,4 +17,6 @@ const indexRoute: Route = {
 	},
 };
 
-export default [{ route: indexRoute }, logRouter, loginRouter, registerRouter, profileRouter] as Array<{ route: Route }>;
+export default [{ route: indexRoute }, testRouter, logRouter, loginRouter, registerRouter, profileRouter, apiKeyAndSecretRouter] as Array<{
+	route: Route;
+}>;
