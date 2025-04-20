@@ -1,6 +1,6 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { usersTable } from '@/lib/db/schema';
-import emailServices from '@/lib/services/email.ervice';
+import emailServices from '@/lib/services/email.service';
 import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/session';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
