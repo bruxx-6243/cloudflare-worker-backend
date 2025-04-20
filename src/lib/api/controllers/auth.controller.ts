@@ -1,5 +1,6 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { usersTable } from '@/lib/db/schema';
+import emailServices from '@/lib/services/email.ervice';
 import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/session';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
@@ -42,6 +43,13 @@ export default class AuthController extends BaseController {
 
 			const token = signJWT(user, ctx.env.JWT_SECRET);
 			const { password: _, ...rest } = user;
+
+			await emailServices.courier({
+				to: user.email,
+				template: ctx.env.LOGIN_TEMPLATE,
+				token: ctx.env.COURIER_AUTH_TOKEN,
+				name: `${user.firstName} ${user.lastName}`,
+			});
 
 			return new Response(JSON.stringify({ token, user: rest, expires_in: TOKEN_DURATION }), {
 				status: 200,
@@ -101,6 +109,14 @@ export default class AuthController extends BaseController {
 
 			const token = signJWT(user, ctx.env.JWT_SECRET);
 			const { password, ...rest } = user;
+
+			await emailServices.courier({
+				to: user.email,
+				email: user.email,
+				token: ctx.env.COURIER_AUTH_TOKEN,
+				template: ctx.env.REGISTER_TEMPLATE,
+				name: `${user.firstName} ${user.lastName}`,
+			});
 
 			return new Response(JSON.stringify({ user: rest, token, message: 'User registered' }), {
 				status: 201,
