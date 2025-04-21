@@ -12,16 +12,9 @@ class EmailServiceError extends Error {
 }
 
 const emailServices = {
-	courier: async ({
-		to,
-		name,
-		token,
-		email,
-		template,
-		apiUrl = 'https://api.courier.com/send',
-	}: EmailPayload & { token: string; apiUrl?: string }): Promise<string> => {
+	courier: async ({ to, name, token, email, template }: EmailPayload & { token: string }): Promise<string> => {
 		try {
-			const response = await fetch(apiUrl, {
+			const response = await fetch('https://api.courier.com/send', {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -31,7 +24,12 @@ const emailServices = {
 					message: {
 						template,
 						to: { email: to },
-						data: { name, email, login_time: new Date().toLocaleString(), registration_date: new Date().toLocaleString() },
+						data: {
+							name,
+							email,
+							login_time: new Date().toLocaleString(),
+							registration_date: new Date().toLocaleString(),
+						},
 					},
 				}),
 			});
@@ -46,6 +44,49 @@ const emailServices = {
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 			throw new EmailServiceError(`Courier service error: ${errorMessage}`);
+		}
+	},
+	mailerSend: async ({
+		from,
+		to,
+		subject,
+		text,
+		html,
+		token,
+	}: {
+		from: string;
+		to: string;
+		subject: string;
+		text: string;
+		html: string;
+		token: string;
+	}) => {
+		try {
+			const response = await fetch('https://api.mailersend.com/v1/email', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					'X-Requested-With': 'XMLHttpRequest',
+				},
+				body: JSON.stringify({
+					from: { email: from },
+					to: [{ email: to }],
+					subject,
+					text,
+					html,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new EmailServiceError(`Failed to send email: ${errorText}`);
+			}
+
+			return await response.json();
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			throw new EmailServiceError(`MailerSend service error: ${errorMessage}`);
 		}
 	},
 };
