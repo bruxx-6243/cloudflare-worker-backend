@@ -1,5 +1,5 @@
 import { apiKeyAndSecretRouter } from '@/lib/api/routes/api-key.route';
-import { loginRouter, profileRouter, registerRouter } from '@/lib/api/routes/auth.route';
+import { loginRouter, logoutRouter, profileRouter, refreshRouter, registerRouter } from '@/lib/api/routes/auth.route';
 import { logRouter } from '@/lib/api/routes/logs.route';
 import { Route } from '@/types';
 
@@ -43,6 +43,6 @@ function withApiPrefix<T extends { route: Route }>(router: T): T {
 	};
 }
 
-const routes = [logRouter, loginRouter, registerRouter, profileRouter, apiKeyAndSecretRouter];
+const routes = [logRouter, loginRouter, logoutRouter, refreshRouter, registerRouter, profileRouter, apiKeyAndSecretRouter];
 
 export default [indexRoute, ...routes.map(withApiPrefix)];

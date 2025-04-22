@@ -1,4 +1,4 @@
-import { login, profile, register } from '@/lib/api/controllers/auth.controller';
+import { login, profile, refresh, register } from '@/lib/api/controllers/auth.controller';
 import { authMiddleware } from '@/middlewares';
 import { Route } from '@/types';
 
@@ -17,11 +17,26 @@ export const loginRouter = {
 	}),
 };
 
+export const logoutRouter = {
+	route: withAuthPrefix({
+		path: 'login',
+		method: 'POST',
+		handler: login,
+	}),
+};
+
 export const registerRouter = {
 	route: withAuthPrefix({
 		path: 'register',
 		method: 'POST',
 		handler: register,
+	}),
+};
+export const refreshRouter = {
+	route: withAuthPrefix({
+		path: 'refresh',
+		method: 'POST',
+		handler: refresh,
 	}),
 };
 

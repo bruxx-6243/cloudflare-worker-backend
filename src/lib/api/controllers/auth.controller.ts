@@ -1,6 +1,7 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { sessionsTable, usersTable } from '@/lib/db/schema';
 import { ACCESS_TOKEN_DURATION, comparePassword, generateAccessToken, generateRefreshToken, REFRESH_TOKEN_DURATION } from '@/lib/session';
+import { parseCookies } from '@/lib/utilis';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
 
@@ -123,6 +124,8 @@ export default class AuthController extends BaseController {
 			const [user] = await ctx.db.insert(usersTable).values(values).returning();
 
 			const accessToken = generateAccessToken(user, ctx.env.JWT_ACCESS_SECRET);
+			const refreshToken = generateRefreshToken(user, ctx.env.JWT_REFRESH_SECRET);
+
 			const { password, ...rest } = user;
 
 			// await emailServices.courier({
@@ -133,12 +136,82 @@ export default class AuthController extends BaseController {
 			// 	name: `${user.firstName} ${user.lastName}`,
 			// });
 
-			return new Response(JSON.stringify({ user: rest, token: accessToken, message: 'User registered' }), {
-				status: 201,
-				headers: { 'Content-Type': 'application/json' },
+			const response = new Response(JSON.stringify({ token: accessToken, user: rest, expires_in: 3600 }), {
+				status: 200,
+				headers: {
+					'Content-Type': 'application/json',
+					'Cache-Control': 'no-store',
+				},
 			});
+
+			response.headers.set(
+				'Set-Cookie',
+				`refresh_token=${refreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${REFRESH_TOKEN_DURATION}`
+			);
+
+			return response;
 		} catch (error) {
 			console.error('Registration error:', error);
+			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+				status: 500,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+	}
+
+	async refresh(request: Request, ctx: AppContext): Promise<Response> {
+		try {
+			const cookies = parseCookies(request);
+			const refreshToken = cookies['refresh_token'];
+
+			if (!refreshToken) {
+				return new Response(JSON.stringify({ error: 'No refresh token provided' }), {
+					status: 401,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			const [session] = await ctx.db.select().from(sessionsTable).where(eq(sessionsTable.refreshToken, refreshToken));
+
+			if (!session) {
+				return new Response(JSON.stringify({ error: 'Invalid refresh token' }), {
+					status: 401,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			const [user] = await ctx.db.select().from(usersTable).where(eq(usersTable.id, session.userId));
+
+			if (!user) {
+				return new Response(JSON.stringify({ error: 'User not found' }), {
+					status: 404,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			const newAccessToken = generateAccessToken(user, ctx.env.JWT_ACCESS_SECRET);
+
+			const newRefreshToken = generateRefreshToken(user, ctx.env.JWT_REFRESH_SECRET);
+			await ctx.db.update(sessionsTable).set({ refreshToken: newRefreshToken }).where(eq(sessionsTable.refreshToken, refreshToken));
+
+			const { password: _, ...rest } = user;
+
+			const response = new Response(JSON.stringify({ token: newAccessToken, user: rest, expires_in: 3600 }), {
+				status: 200,
+				headers: {
+					'Content-Type': 'application/json',
+					'Cache-Control': 'no-store',
+				},
+			});
+
+			response.headers.set(
+				'Set-Cookie',
+				`refresh_token=${newRefreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${7 * 24 * 3600}`
+			);
+
+			return response;
+		} catch (error) {
+			console.error('Refresh error:', error);
 			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
 				status: 500,
 				headers: { 'Content-Type': 'application/json' },
@@ -173,6 +246,44 @@ export default class AuthController extends BaseController {
 			});
 		}
 	}
+
+	async logout(request: Request, ctx: AppContext): Promise<Response> {
+		try {
+			const cookies = parseCookies(request);
+			const refreshToken = cookies['refresh_token'];
+
+			if (!refreshToken) {
+				const response = new Response(JSON.stringify({ message: 'Logged out' }), {
+					status: 200,
+					headers: {
+						'Content-Type': 'application/json',
+						'Cache-Control': 'no-store',
+					},
+				});
+				response.headers.set('Set-Cookie', `refresh_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`);
+				return response;
+			}
+
+			await ctx.db.delete(sessionsTable).where(eq(sessionsTable.refreshToken, refreshToken));
+
+			const response = new Response(JSON.stringify({ message: 'Logged out' }), {
+				status: 200,
+				headers: {
+					'Content-Type': 'application/json',
+					'Cache-Control': 'no-store',
+				},
+			});
+			response.headers.set('Set-Cookie', `refresh_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`);
+
+			return response;
+		} catch (error) {
+			console.error('Logout error:', error);
+			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+				status: 500,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+	}
 }
 
-export const { login, register, profile } = new AuthController();
+export const { login, logout, register, profile, refresh } = new AuthController();
