@@ -1,5 +1,5 @@
 import { apiKeysTable } from '@/lib/db/schema';
-import { verifySession } from '@/lib/session';
+import { verifyAccessToken } from '@/lib/session';
 import { AppContext, Handler, SessionContext } from '@/types';
 import { and, eq } from 'drizzle-orm';
 
@@ -21,7 +21,7 @@ export function authMiddleware(handler: Handler<SessionContext>): Handler<AppCon
 				});
 			}
 
-			const session = await verifySession(token, ctx.env.JWT_SECRET);
+			const session = await verifyAccessToken(token, ctx.env.JWT_ACCESS_SECRET);
 
 			if (!session) {
 				return new Response(JSON.stringify({ error: 'Unauthorized: Invalid session' }), {

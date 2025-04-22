@@ -1,3 +1,6 @@
+import { SessionPayload } from '@/lib/session';
+import jwt from 'jsonwebtoken';
+
 export function validateIp(ip: string): boolean {
 	const ipv4Regex = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 	const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
@@ -31,4 +34,24 @@ export function parseCookies(request: Request) {
 	});
 
 	return cookies;
+}
+
+export async function verifyToken(token: string, secret: string): Promise<SessionPayload> {
+	try {
+		const decoded = jwt.verify(token, secret) as SessionPayload;
+
+		if (!decoded.user.id) {
+			throw new Error('Invalid session: Missing userId');
+		}
+
+		return decoded;
+	} catch (error) {
+		if (error instanceof jwt.TokenExpiredError) {
+			throw new Error('Session expired');
+		}
+		if (error instanceof jwt.JsonWebTokenError) {
+			throw new Error('Invalid session token');
+		}
+		throw new Error('Session verification failed');
+	}
 }

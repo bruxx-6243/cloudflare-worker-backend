@@ -219,7 +219,7 @@ export default class AuthController extends BaseController {
 		}
 	}
 
-	async profile(_: Request, ctx: SessionContext): Promise<Response> {
+	async profile(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
 			const userId = ctx.session.user.id;
 
