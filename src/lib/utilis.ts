@@ -1,4 +1,5 @@
 import { SessionPayload } from '@/lib/session';
+import { User } from '@/types';
 import jwt from 'jsonwebtoken';
 
 export function validateIp(ip: string): boolean {
@@ -54,4 +55,14 @@ export async function verifyToken(token: string, secret: string): Promise<Sessio
 		}
 		throw new Error('Session verification failed');
 	}
+}
+
+export function generateToken(user: User, secret: string, expiresIn: number) {
+	const { password, ...rest } = user;
+
+	const token = jwt.sign({ user: rest }, secret, {
+		expiresIn,
+	});
+
+	return token;
 }
