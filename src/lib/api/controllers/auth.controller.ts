@@ -1,6 +1,6 @@
 import BaseController from '@/lib/api/controllers/base.controller';
-import { usersTable } from '@/lib/db/schema';
-import { signJWT, TOKEN_DURATION, verifyPassword } from '@/lib/session';
+import { sessionsTable, usersTable } from '@/lib/db/schema';
+import { ACCESS_TOKEN_DURATION, comparePassword, generateAccessToken, generateRefreshToken, REFRESH_TOKEN_DURATION } from '@/lib/session';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
 
@@ -31,7 +31,7 @@ export default class AuthController extends BaseController {
 				});
 			}
 
-			const isValidPassword = await verifyPassword(password, user.password);
+			const isValidPassword = await comparePassword(password, user.password);
 
 			if (!isValidPassword) {
 				return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
@@ -40,7 +40,14 @@ export default class AuthController extends BaseController {
 				});
 			}
 
-			const token = signJWT(user, ctx.env.JWT_SECRET);
+			const accessToken = generateAccessToken(user, ctx.env.JWT_ACCESS_SECRET);
+			const refreshToken = generateRefreshToken(user, ctx.env.JWT_REFRESH_SECRET);
+
+			await ctx.db.insert(sessionsTable).values({
+				userId: user.id,
+				refreshToken: refreshToken,
+			});
+
 			const { password: _, ...rest } = user;
 
 			// await emailServices.courier({
@@ -50,10 +57,19 @@ export default class AuthController extends BaseController {
 			// 	name: `${user.firstName} ${user.lastName}`,
 			// });
 
-			return new Response(JSON.stringify({ token, user: rest, expires_in: TOKEN_DURATION }), {
+			const response = new Response(JSON.stringify({ token: accessToken, user: rest, expires_in: ACCESS_TOKEN_DURATION }), {
 				status: 200,
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+				},
 			});
+
+			response.headers.set(
+				'Set-Cookie',
+				`refresh_token=${refreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${REFRESH_TOKEN_DURATION}`
+			);
+
+			return response;
 		} catch (error) {
 			console.error('Login error:', error);
 			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
@@ -106,7 +122,7 @@ export default class AuthController extends BaseController {
 
 			const [user] = await ctx.db.insert(usersTable).values(values).returning();
 
-			const token = signJWT(user, ctx.env.JWT_SECRET);
+			const accessToken = generateAccessToken(user, ctx.env.JWT_ACCESS_SECRET);
 			const { password, ...rest } = user;
 
 			// await emailServices.courier({
@@ -117,7 +133,7 @@ export default class AuthController extends BaseController {
 			// 	name: `${user.firstName} ${user.lastName}`,
 			// });
 
-			return new Response(JSON.stringify({ user: rest, token, message: 'User registered' }), {
+			return new Response(JSON.stringify({ user: rest, token: accessToken, message: 'User registered' }), {
 				status: 201,
 				headers: { 'Content-Type': 'application/json' },
 			});

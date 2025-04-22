@@ -2,7 +2,8 @@ import type { User } from '@/types';
 import { compare } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-export const TOKEN_DURATION = 1000 * 60 * 60 * 1;
+export const ACCESS_TOKEN_DURATION = 1000 * 60 * 15;
+export const REFRESH_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 7;
 
 export type SessionPayload = {
 	user: Omit<User, 'password'>;
@@ -30,15 +31,25 @@ export async function verifySession(token: string, secret: string): Promise<Sess
 	}
 }
 
-export async function verifyPassword(password: string, passwordHash: string) {
+export async function comparePassword(password: string, passwordHash: string) {
 	return await compare(password, passwordHash);
 }
 
-export function signJWT(user: User, secret: string) {
+export function generateAccessToken(user: User, secret: string) {
 	const { password, ...rest } = user;
 
 	const token = jwt.sign({ user: rest }, secret, {
-		expiresIn: TOKEN_DURATION,
+		expiresIn: ACCESS_TOKEN_DURATION,
+	});
+
+	return token;
+}
+
+export function generateRefreshToken(user: User, secret: string) {
+	const { password, ...rest } = user;
+
+	const token = jwt.sign({ user: rest }, secret, {
+		expiresIn: REFRESH_TOKEN_DURATION,
 	});
 
 	return token;

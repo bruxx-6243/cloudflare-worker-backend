@@ -20,3 +20,15 @@ export function createScret(length: number = 32): string {
 	}
 	return result;
 }
+
+export function parseCookies(request: Request) {
+	const cookieHeader = request.headers.get('Cookie') ?? '';
+	const cookies: Record<string, string> = {};
+
+	cookieHeader.split(';').forEach((cookie) => {
+		const [name, ...rest] = cookie.trim().split('=');
+		cookies[name] = decodeURIComponent(rest.join('='));
+	});
+
+	return cookies;
+}

@@ -28,6 +28,17 @@ export const usersTable = pgTable('users', {
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+export const sessionsTable = pgTable('sessions', {
+	id: uuid('id').primaryKey().defaultRandom(),
+
+	userId: uuid('user_id')
+		.notNull()
+		.references(() => usersTable.id, { onDelete: 'cascade' }),
+	refreshToken: varchar('refresh_token', { length: 255 }).notNull().unique(),
+
+	createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 export const apiKeysTable = pgTable('api_keys', {
 	id: uuid('id').primaryKey().defaultRandom(),
 
