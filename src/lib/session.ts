@@ -12,11 +12,11 @@ export type SessionPayload = {
 	[key: string]: any;
 };
 
-export function generateAccessToken(user: User, secret: string) {
+export function generateAccessToken(user: User, secret: string): string {
 	return generateToken(user, secret, ACCESS_TOKEN_DURATION);
 }
 
-export function generateRefreshToken(user: User, secret: string) {
+export function generateRefreshToken(user: User, secret: string): string {
 	return generateToken(user, secret, REFRESH_TOKEN_DURATION);
 }
 
@@ -28,6 +28,6 @@ export async function verifyRefreshToken(token: string, secret: string): Promise
 	return verifyToken(token, secret);
 }
 
-export async function comparePassword(password: string, passwordHash: string) {
+export async function comparePassword(password: string, passwordHash: string): Promise<boolean> {
 	return await compare(password, passwordHash);
 }
