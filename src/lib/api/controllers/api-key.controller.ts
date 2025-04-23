@@ -4,7 +4,7 @@ import { createScret, createSSHKey } from '@/lib/utilis';
 import { SessionContext } from '@/types';
 
 export default class ApiKeyAndSecretController extends BaseController {
-	async generateApiKeyAndSecret(request: Request, ctx: SessionContext): Promise<Response> {
+	async generateApiKeyAndSecret(_: Request, ctx: SessionContext): Promise<Response> {
 		try {
 			const userId = ctx.session.user.id;
 
