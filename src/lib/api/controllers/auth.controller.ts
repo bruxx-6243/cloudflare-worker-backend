@@ -79,6 +79,7 @@ export default class AuthController extends BaseController {
 			});
 		}
 	}
+
 	async register(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const data = await request.json();
@@ -246,7 +247,7 @@ export default class AuthController extends BaseController {
 			});
 		}
 	}
-
+	
 	async logout(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const cookies = parseCookies(request);
