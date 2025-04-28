@@ -19,7 +19,6 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
 	fullName: z.string().min(3, { message: 'Full name must be at least 3 characters long' }),
 	email: z.string().email({ message: 'Invalid email' }),
-	avatar: z.string().url({ message: 'Invalid avatar url' }),
+	avatar: z.string().url({ message: 'Invalid avatar url' }).optional(),
 	password: PasswordSchema,
-	confirmPassword: PasswordSchema,
 });
