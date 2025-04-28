@@ -42,3 +42,16 @@ export type EmailPayload = {
 	subject?: string;
 	template: string;
 };
+
+export type CloudflareImageResponse = {
+	success: boolean;
+	errors: any[];
+	messages: any[];
+	result?: {
+		id: string;
+		filename: string;
+		uploaded: string;
+		requireSignedURLs: boolean;
+		variants: string[];
+	};
+};
