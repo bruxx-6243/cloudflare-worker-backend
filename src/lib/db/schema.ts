@@ -18,7 +18,7 @@ export const requestLogsTable = pgTable('request_logs', {
 export const usersTable = pgTable('users', {
 	id: uuid('id').primaryKey().defaultRandom(),
 
-	avatar: varchar('avatar', { length: 255 }).notNull(),
+	avatar: varchar('avatar', { length: 255 }),
 	password: varchar('password', { length: 255 }).notNull(),
 	fullName: varchar('full_name', { length: 255 }).notNull(),
 	email: varchar('email', { length: 255 }).notNull().unique(),

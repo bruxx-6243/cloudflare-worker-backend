@@ -17,9 +17,9 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
+	fullName: z.string().min(3, { message: 'Full name must be at least 3 characters long' }),
+	email: z.string().email({ message: 'Invalid email' }),
+	avatar: z.string().url({ message: 'Invalid avatar url' }),
 	password: PasswordSchema,
-	userName: z.string().min(1, { message: 'Username is required' }).max(255, { message: 'Username must not exceed 255 characters' }),
-	firstName: z.string().min(1, { message: 'First name is required' }).max(255, { message: 'First name must not exceed 255 characters' }),
-	lastName: z.string().min(1, { message: 'Last name is required' }).max(255, { message: 'Last name must not exceed 255 characters' }),
-	email: z.string().email({ message: 'Invalid email address' }).max(255, { message: 'Email must not exceed 255 characters' }),
+	confirmPassword: PasswordSchema,
 });

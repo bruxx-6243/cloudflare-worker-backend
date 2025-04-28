@@ -51,13 +51,6 @@ export default class AuthController extends BaseController {
 
 			const { password: _, ...rest } = user;
 
-			// await emailServices.courier({
-			// 	to: user.email,
-			// 	template: ctx.env.LOGIN_TEMPLATE,
-			// 	token: ctx.env.COURIER_AUTH_TOKEN,
-			// 	name: `${user.firstName} ${user.lastName}`,
-			// });
-
 			const response = new Response(JSON.stringify({ token: accessToken, user: rest, expires_in: ACCESS_TOKEN_DURATION }), {
 				status: 200,
 				headers: {
@@ -117,9 +110,8 @@ export default class AuthController extends BaseController {
 			const values = {
 				email: validData.email,
 				password: hashedPassword,
-				lastName: validData.lastName,
-				userName: validData.userName,
-				firstName: validData.firstName,
+				fullName: validData.fullName,
+				avatar: validData.avatar,
 			};
 
 			const [user] = await ctx.db.insert(usersTable).values(values).returning();
@@ -128,14 +120,6 @@ export default class AuthController extends BaseController {
 			const refreshToken = generateRefreshToken(user, ctx.env.JWT_REFRESH_SECRET);
 
 			const { password, ...rest } = user;
-
-			// await emailServices.courier({
-			// 	to: user.email,
-			// 	email: user.email,
-			// 	token: ctx.env.COURIER_AUTH_TOKEN,
-			// 	template: ctx.env.REGISTER_TEMPLATE,
-			// 	name: `${user.firstName} ${user.lastName}`,
-			// });
 
 			const response = new Response(JSON.stringify({ token: accessToken, user: rest, expires_in: 3600 }), {
 				status: 200,
@@ -247,7 +231,7 @@ export default class AuthController extends BaseController {
 			});
 		}
 	}
-	
+
 	async logout(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const cookies = parseCookies(request);
