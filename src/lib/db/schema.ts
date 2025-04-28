@@ -1,6 +1,7 @@
 import { pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export const userStatusEnum = pgEnum('status', ['ACTIVE', 'INACTIVE', 'DELETED']);
+export const userRoleEnum = pgEnum('role', ['ADMIN', 'USER']);
 
 export const requestLogsTable = pgTable('request_logs', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -17,12 +18,11 @@ export const requestLogsTable = pgTable('request_logs', {
 export const usersTable = pgTable('users', {
 	id: uuid('id').primaryKey().defaultRandom(),
 
-	userName: varchar('user_name', { length: 255 }).notNull(),
-	firstName: varchar('first_name', { length: 255 }).notNull(),
-	lastName: varchar('last_name', { length: 255 }).notNull(),
+	avatar: varchar('avatar', { length: 255 }).notNull(),
 	password: varchar('password', { length: 255 }).notNull(),
+	fullName: varchar('full_name', { length: 255 }).notNull(),
 	email: varchar('email', { length: 255 }).notNull().unique(),
-	status: userStatusEnum('status').default('ACTIVE').notNull(),
+	role: userRoleEnum('role').notNull().default('USER'),
 
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),

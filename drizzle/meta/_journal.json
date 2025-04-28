@@ -78,6 +78,13 @@
       "when": 1745354645487,
       "tag": "0010_married_prowler",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1745841577514,
+      "tag": "0011_free_valeria_richards",
+      "breakpoints": true
     }
   ]
 }
