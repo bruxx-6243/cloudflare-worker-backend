@@ -8,7 +8,7 @@ export default class ApiKeyAndSecretController extends BaseController {
 		try {
 			const userId = ctx.session.user.id;
 
-			const generatedKey = createSSHKey(ctx.session.user.userName);
+			const generatedKey = createSSHKey(ctx.session.user.email);
 			const generatedSecret = createScret();
 
 			const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

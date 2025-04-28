@@ -1,6 +1,6 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { uploadImageToCloudflare } from '@/lib/utilis';
-import { AppContext } from '@/types';
+import type { AppContext } from '@/types';
 
 export default class UploadFileController extends BaseController {
 	async uplaodFile(request: Request, ctx: AppContext) {
