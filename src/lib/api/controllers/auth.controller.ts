@@ -3,6 +3,7 @@ import { sessionsTable, usersTable } from '@/lib/db/schema';
 import emailServices from '@/lib/services/email.service';
 import { ACCESS_TOKEN_DURATION, comparePassword, generateAccessToken, generateRefreshToken, REFRESH_TOKEN_DURATION } from '@/lib/session';
 import { parseCookies } from '@/lib/utilis';
+import { loginTemplate } from '@/templates/login-template';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
 
@@ -73,8 +74,8 @@ export default class AuthController extends BaseController {
 					},
 					body: {
 						to: user.email,
-						subject: 'Login',
-						template: `<h1>Hello ${user.fullName}</h1><p>You have logged in to your account</p>`,
+						subject: 'New Login Notification',
+						template: loginTemplate(user.fullName),
 					},
 				},
 			});
