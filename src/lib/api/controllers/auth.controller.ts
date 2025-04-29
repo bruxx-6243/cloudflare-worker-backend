@@ -1,5 +1,6 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { sessionsTable, usersTable } from '@/lib/db/schema';
+import emailServices from '@/lib/services/email.service';
 import { ACCESS_TOKEN_DURATION, comparePassword, generateAccessToken, generateRefreshToken, REFRESH_TOKEN_DURATION } from '@/lib/session';
 import { parseCookies } from '@/lib/utilis';
 import { AppContext, SessionContext } from '@/types';
@@ -62,6 +63,21 @@ export default class AuthController extends BaseController {
 				'Set-Cookie',
 				`refresh_token=${refreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${REFRESH_TOKEN_DURATION}`
 			);
+
+			await emailServices.sendEmail({
+				url: ctx.env.NODE_ENV === 'development' ? ctx.env.EMAIL_LOCAL_API_URL : ctx.env.EMAIL_REMOTE_API_URL,
+				data: {
+					headers: {
+						user: ctx.env.EMAIL_USER,
+						password: ctx.env.EMAIL_PASSWORD,
+					},
+					body: {
+						to: user.email,
+						subject: 'Login',
+						template: `<h1>Hello ${user.fullName}</h1><p>You have logged in to your account</p>`,
+					},
+				},
+			});
 
 			return response;
 		} catch (error) {
