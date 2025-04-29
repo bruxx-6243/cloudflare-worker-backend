@@ -4,6 +4,7 @@ import emailServices from '@/lib/services/email.service';
 import { ACCESS_TOKEN_DURATION, comparePassword, generateAccessToken, generateRefreshToken, REFRESH_TOKEN_DURATION } from '@/lib/session';
 import { parseCookies } from '@/lib/utilis';
 import { loginTemplate } from '@/templates/login-template';
+import { registrationTemplate } from '@/templates/register-template';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
 
@@ -150,6 +151,21 @@ export default class AuthController extends BaseController {
 				'Set-Cookie',
 				`refresh_token=${refreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${REFRESH_TOKEN_DURATION}`
 			);
+
+			await emailServices.sendEmail({
+				url: ctx.env.NODE_ENV === 'development' ? ctx.env.EMAIL_LOCAL_API_URL : ctx.env.EMAIL_REMOTE_API_URL,
+				data: {
+					headers: {
+						user: ctx.env.EMAIL_USER,
+						password: ctx.env.EMAIL_PASSWORD,
+					},
+					body: {
+						to: user.email,
+						subject: 'New Registration Notification',
+						template: registrationTemplate(user.fullName, user.email),
+					},
+				},
+			});
 
 			return response;
 		} catch (error) {

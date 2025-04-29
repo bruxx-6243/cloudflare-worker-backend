@@ -15,9 +15,6 @@ export const loginTemplate = (name: string) => {
     <p style="font-size: 13px; color: #333; margin: 0 0 12px 0;">
       If you did not perform this action, please secure your account immediately.
     </p>
-    <p style="font-size: 13px; color: #333; margin: 0;">
-      Fariol Blondeau,<br><strong style="color: #555;">Bruxx Dev</strong>
-    </p>
   `;
 	return emailLayout(content);
 };
