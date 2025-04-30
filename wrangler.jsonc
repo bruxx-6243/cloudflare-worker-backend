@@ -8,8 +8,6 @@
 	},
 	"compatibility_flags": ["nodejs_compat"],
 	"vars": {
-		"NODE_ENV": "development",
-		"EMAIL_REMOTE_API_URL": "https://email-http-sercices-01.onrender.com",
-		"EMAIL_LOCAL_API_URL": "http://localhost:3000"
+		"EMAIL_REMOTE_API_URL": "https://email-http-sercices-01.onrender.com"
 	}
 }

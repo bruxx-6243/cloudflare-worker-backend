@@ -67,7 +67,7 @@ export default class AuthController extends BaseController {
 			);
 
 			await emailServices.sendEmail({
-				url: ctx.env.NODE_ENV === 'development' ? ctx.env.EMAIL_LOCAL_API_URL : ctx.env.EMAIL_REMOTE_API_URL,
+				url: ctx.env.EMAIL_REMOTE_API_URL,
 				data: {
 					headers: {
 						user: ctx.env.EMAIL_USER,
@@ -153,7 +153,7 @@ export default class AuthController extends BaseController {
 			);
 
 			await emailServices.sendEmail({
-				url: ctx.env.NODE_ENV === 'development' ? ctx.env.EMAIL_LOCAL_API_URL : ctx.env.EMAIL_REMOTE_API_URL,
+				url: ctx.env.EMAIL_REMOTE_API_URL,
 				data: {
 					headers: {
 						user: ctx.env.EMAIL_USER,
