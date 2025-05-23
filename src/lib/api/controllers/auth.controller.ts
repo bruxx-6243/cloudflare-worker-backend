@@ -208,8 +208,8 @@ export default class AuthController extends BaseController {
 			}
 
 			const newAccessToken = generateAccessToken(user, ctx.env.JWT_ACCESS_SECRET);
-
 			const newRefreshToken = generateRefreshToken(user, ctx.env.JWT_REFRESH_SECRET);
+
 			await ctx.db.update(sessionsTable).set({ refreshToken: newRefreshToken }).where(eq(sessionsTable.refreshToken, refreshToken));
 
 			const { password: _, ...rest } = user;
