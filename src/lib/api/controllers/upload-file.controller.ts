@@ -22,21 +22,13 @@ export default class UploadFileController extends BaseController {
 				throw new Error('Upload file failed');
 			}
 
-			return new Response(
-				JSON.stringify({
-					message: 'image uploaded successfully',
-					file_url: data.result?.variants[0],
-				}),
-				{
-					status: 200,
-					headers: { 'Content-Type': 'application/json' },
-				}
-			);
-		} catch (error) {
-			return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Upload file failed' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' },
+			return this.jsonResponse({
+				message: 'image uploaded successfully',
+				file_url: data.result?.variants[0],
 			});
+		} catch (error) {
+			console.log(error);
+			return this.jsonResponse({ error: 'Upload file failed' }, 500);
 		}
 	}
 }

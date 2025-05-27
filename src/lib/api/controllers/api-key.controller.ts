@@ -25,16 +25,10 @@ export default class ApiKeyAndSecretController extends BaseController {
 
 			const { key, secret } = apikey;
 
-			return new Response(JSON.stringify({ api_key: key, api_secret: secret }), {
-				status: 200,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ api_key: key, api_secret: secret }, 200);
 		} catch (error) {
 			console.error('APIKeyError:', error);
-			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
 		}
 	}
 }
