@@ -5,6 +5,14 @@ import type { AppContext } from '@/types';
 export default class UploadFileController extends BaseController {
 	async uplaodFile(request: Request, ctx: AppContext) {
 		try {
+			const contentLength = request.headers.get('content-length');
+			if (!contentLength || contentLength === '0') {
+				return new Response(JSON.stringify({ message: 'No data provided' }), {
+					status: 400,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
 			const formData = await request.formData();
 			const file = formData.get('file') as File;
 

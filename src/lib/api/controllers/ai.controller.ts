@@ -2,18 +2,32 @@ import BaseController from '@/lib/api/controllers/base.controller';
 import { SessionContext } from '@/types';
 
 export class AIController extends BaseController {
-	async aiChat(request: Request, ctx: SessionContext): Promise<Response> {
+	async chatWithAI(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
+			const contentLength = request.headers.get('content-length');
+			if (!contentLength || contentLength === '0') {
+				return new Response(JSON.stringify({ message: 'No data provided' }), {
+					status: 400,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
 			const data = await request.json();
 
-			return new Response(JSON.stringify({ message: 'Hello world' }), {
+			if (!data || Object.keys(data).length === 0) {
+				return new Response(JSON.stringify({ message: 'No data provided' }), {
+					status: 400,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			return new Response(JSON.stringify({ message: 'Hello world', data: data }), {
 				status: 200,
 				headers: { 'Content-Type': 'application/json' },
 			});
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Failed to process AI chat request';
-
-			return new Response(JSON.stringify({ error: errorMessage }), {
+			console.error('Error in aiChat:', error);
+			return new Response(JSON.stringify({ message: 'Internal Server Error' }), {
 				status: 500,
 				headers: { 'Content-Type': 'application/json' },
 			});
@@ -21,4 +35,4 @@ export class AIController extends BaseController {
 	}
 }
 
-export const { aiChat } = new AIController();
+export const { chatWithAI } = new AIController();

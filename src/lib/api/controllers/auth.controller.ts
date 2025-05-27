@@ -14,6 +14,14 @@ import { eq } from 'drizzle-orm';
 export default class AuthController extends BaseController {
 	async login(request: Request, ctx: AppContext): Promise<Response> {
 		try {
+			const contentLength = request.headers.get('content-length');
+			if (!contentLength || contentLength === '0') {
+				return new Response(JSON.stringify({ message: 'No data provided' }), {
+					status: 400,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
 			const data = await request.json();
 			const validateData = loginSchema.safeParse(data);
 
@@ -93,6 +101,14 @@ export default class AuthController extends BaseController {
 
 	async register(request: Request, ctx: AppContext): Promise<Response> {
 		try {
+			const contentLength = request.headers.get('content-length');
+			if (!contentLength || contentLength === '0') {
+				return new Response(JSON.stringify({ message: 'No data provided' }), {
+					status: 400,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
 			const data = await request.json();
 			const validateData = registerSchema.safeParse(data);
 
