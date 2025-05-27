@@ -16,20 +16,14 @@ export default class AuthController extends BaseController {
 		try {
 			const contentLength = request.headers.get('content-length');
 			if (!contentLength || contentLength === '0') {
-				return new Response(JSON.stringify({ message: 'No data provided' }), {
-					status: 400,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ message: 'No data provided' }, 400);
 			}
 
 			const data = await request.json();
 			const validateData = loginSchema.safeParse(data);
 
 			if (!validateData.success) {
-				return new Response(JSON.stringify({ error: 'Invalid data' }), {
-					status: 400,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ error: 'Validation failed' }, 400);
 			}
 
 			const { email, password } = validateData.data;
@@ -37,19 +31,13 @@ export default class AuthController extends BaseController {
 			const [user] = await ctx.db.select().from(usersTable).where(eq(usersTable.email, email));
 
 			if (!user) {
-				return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
-					status: 401,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ error: 'Invalid credentials' }, 401);
 			}
 
 			const isValidPassword = await comparePassword(password, user.password);
 
 			if (!isValidPassword) {
-				return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
-					status: 401,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ error: 'Invalid credentials' }, 401);
 			}
 
 			const accessToken = generateAccessToken(user, ctx.env.JWT_ACCESS_SECRET);
@@ -92,10 +80,7 @@ export default class AuthController extends BaseController {
 			return response;
 		} catch (error) {
 			console.error('Login error:', error);
-			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
 		}
 	}
 
@@ -103,29 +88,14 @@ export default class AuthController extends BaseController {
 		try {
 			const contentLength = request.headers.get('content-length');
 			if (!contentLength || contentLength === '0') {
-				return new Response(JSON.stringify({ message: 'No data provided' }), {
-					status: 400,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ message: 'No data provided' }, 400);
 			}
 
 			const data = await request.json();
 			const validateData = registerSchema.safeParse(data);
 
 			if (!validateData.success) {
-				return new Response(
-					JSON.stringify({
-						error: 'Validation failed',
-						details: validateData.error.errors.map((err) => ({
-							path: err.path.join('.'),
-							message: err.message,
-						})),
-					}),
-					{
-						status: 400,
-						headers: { 'Content-Type': 'application/json' },
-					}
-				);
+				return this.jsonResponse({ error: 'Validation failed' }, 400);
 			}
 
 			const validData = validateData.data;
@@ -186,10 +156,7 @@ export default class AuthController extends BaseController {
 			return response;
 		} catch (error) {
 			console.error('Registration error:', error);
-			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
 		}
 	}
 
@@ -199,28 +166,19 @@ export default class AuthController extends BaseController {
 			const refreshToken = cookies['refresh_token'];
 
 			if (!refreshToken) {
-				return new Response(JSON.stringify({ error: 'No refresh token provided' }), {
-					status: 401,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				this.jsonResponse({ error: 'No refresh token provided' }, 401); // Use this.jsonResponse for JSON responses in the controller ap
 			}
 
 			const [session] = await ctx.db.select().from(sessionsTable).where(eq(sessionsTable.refreshToken, refreshToken));
 
 			if (!session) {
-				return new Response(JSON.stringify({ error: 'Invalid refresh token' }), {
-					status: 401,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ error: 'Invalid refresh token' }, 401);
 			}
 
 			const [user] = await ctx.db.select().from(usersTable).where(eq(usersTable.id, session.userId));
 
 			if (!user) {
-				return new Response(JSON.stringify({ error: 'User not found' }), {
-					status: 404,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ error: 'User not found' }, 404);
 			}
 
 			const newAccessToken = generateAccessToken(user, ctx.env.JWT_ACCESS_SECRET);
@@ -246,10 +204,7 @@ export default class AuthController extends BaseController {
 			return response;
 		} catch (error) {
 			console.error('Refresh error:', error);
-			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
 		}
 	}
 
@@ -260,24 +215,15 @@ export default class AuthController extends BaseController {
 			const [user] = await ctx.db.select().from(usersTable).where(eq(usersTable.id, userId));
 
 			if (!user) {
-				return new Response(JSON.stringify({ error: 'User not found' }), {
-					status: 404,
-					headers: { 'Content-Type': 'application/json' },
-				});
+				return this.jsonResponse({ error: 'User not found' }, 404);
 			}
 
 			const { password, ...rest } = user;
 
-			return new Response(JSON.stringify({ user: rest }), {
-				status: 200,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ user: rest });
 		} catch (error) {
 			console.error('Profile error:', error);
-			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
 		}
 	}
 
@@ -287,15 +233,7 @@ export default class AuthController extends BaseController {
 			const refreshToken = cookies['refresh_token'];
 
 			if (!refreshToken) {
-				const response = new Response(JSON.stringify({ message: 'Logged out' }), {
-					status: 200,
-					headers: {
-						'Content-Type': 'application/json',
-						'Cache-Control': 'no-store',
-					},
-				});
-				response.headers.set('Set-Cookie', `refresh_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`);
-				return response;
+				return this.jsonResponse({ error: 'No refresh token provided' }, 401);
 			}
 
 			await ctx.db.delete(sessionsTable).where(eq(sessionsTable.refreshToken, refreshToken));
@@ -312,10 +250,7 @@ export default class AuthController extends BaseController {
 			return response;
 		} catch (error) {
 			console.error('Logout error:', error);
-			return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-				status: 500,
-				headers: { 'Content-Type': 'application/json' },
-			});
+			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
 		}
 	}
 }

@@ -40,3 +40,9 @@ export const EmailSchema = z.object({
 });
 
 export type Email = z.infer<typeof EmailSchema>;
+
+export const chatMessageSchema = z.object({
+	message: z.string(),
+});
+
+export type ChatMessage = z.infer<typeof chatMessageSchema>;
