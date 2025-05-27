@@ -23,6 +23,7 @@
 		"wrangler": "^4.12.0"
 	},
 	"dependencies": {
+		"@ai-sdk/anthropic": "^1.2.12",
 		"@neondatabase/serverless": "^1.0.0",
 		"@t3-oss/env-core": "^0.12.0",
 		"@types/form-data": "^2.5.2",

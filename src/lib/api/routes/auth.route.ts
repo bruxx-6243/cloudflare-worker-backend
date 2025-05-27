@@ -9,7 +9,7 @@ function withAuthPrefix<T extends Route>(route: Omit<T, 'path'> & { path: string
 	} as T;
 }
 
-export const loginRouter = {
+export const loginRouter: { route: Route } = {
 	route: withAuthPrefix({
 		path: 'login',
 		method: 'POST',
@@ -17,7 +17,7 @@ export const loginRouter = {
 	}),
 };
 
-export const logoutRouter = {
+export const logoutRouter: { route: Route } = {
 	route: withAuthPrefix({
 		path: 'logout',
 		method: 'POST',
@@ -25,14 +25,14 @@ export const logoutRouter = {
 	}),
 };
 
-export const registerRouter = {
+export const registerRouter: { route: Route } = {
 	route: withAuthPrefix({
 		path: 'register',
 		method: 'POST',
 		handler: register,
 	}),
 };
-export const refreshRouter = {
+export const refreshRouter: { route: Route } = {
 	route: withAuthPrefix({
 		path: 'refresh',
 		method: 'POST',
@@ -40,7 +40,7 @@ export const refreshRouter = {
 	}),
 };
 
-export const profileRouter = {
+export const profileRouter: { route: Route } = {
 	route: withAuthPrefix({
 		path: 'profile',
 		method: 'GET',

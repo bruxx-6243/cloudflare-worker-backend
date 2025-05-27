@@ -1,8 +1,9 @@
+import { chatAIRouter } from '@/lib/api/routes/ai.route';
 import { apiKeyAndSecretRouter } from '@/lib/api/routes/api-key.route';
 import { loginRouter, logoutRouter, profileRouter, refreshRouter, registerRouter } from '@/lib/api/routes/auth.route';
 import { logRouter } from '@/lib/api/routes/logs.route';
-import { Route } from '@/types';
-import { uploadFileRoute } from './upload.route';
+import { uploadFileRoute } from '@/lib/api/routes/upload.route';
+import type { Route } from '@/types';
 
 const indexRoute: { route: Route } = {
 	route: {
@@ -44,6 +45,16 @@ function withApiPrefix<T extends { route: Route }>(router: T): T {
 	};
 }
 
-const routes = [logRouter, loginRouter, logoutRouter, refreshRouter, registerRouter, profileRouter, apiKeyAndSecretRouter, uploadFileRoute];
+const routes = [
+	logRouter,
+	loginRouter,
+	logoutRouter,
+	profileRouter,
+	chatAIRouter,
+	refreshRouter,
+	registerRouter,
+	uploadFileRoute,
+	apiKeyAndSecretRouter,
+];
 
 export default [indexRoute, ...routes.map(withApiPrefix)];
