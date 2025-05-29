@@ -1,9 +1,9 @@
 import { pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-export const userStatusEnum = pgEnum('status', ['ACTIVE', 'INACTIVE', 'DELETED']);
 export const userRoleEnum = pgEnum('role', ['ADMIN', 'USER']);
-export const walletStatusEnum = pgEnum('status', ['ACTIVE', 'FREEZE', 'DELETED']);
-export const transactionStatusEnum = pgEnum('status', ['SUCCESS', 'FAILED', 'PENDING']);
+export const userStatusEnum = pgEnum('status', ['ACTIVE', 'INACTIVE', 'DELETED']);
+export const walletStatusEnum = pgEnum('wallet_status', ['ACTIVE', 'FREEZE', 'DELETED']);
+export const transactionStatusEnum = pgEnum('transaction_status', ['SUCCESS', 'FAILED', 'PENDING']);
 
 export const requestLogsTable = pgTable('request_logs', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -57,11 +57,13 @@ export const sessionsTable = pgTable('sessions', {
 export const walletTable = pgTable('wallet', {
 	id: uuid('id').primaryKey().defaultRandom(),
 
+	balance: varchar('balance', { length: 255 }).notNull(),
+	status: walletStatusEnum('status').notNull().default('ACTIVE'),
+	walletNumber: varchar('wallet_number', { length: 255 }).notNull().unique(),
+
 	userId: uuid('user_id')
 		.notNull()
 		.references(() => usersTable.id, { onDelete: 'cascade' }),
-	balance: varchar('balance', { length: 255 }).notNull(),
-	status: walletStatusEnum('status').notNull().default('ACTIVE'),
 
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -80,6 +82,7 @@ export const transactionsTable = pgTable('transactions', {
 
 	amount: varchar('amount', { length: 255 }).notNull(),
 	status: transactionStatusEnum('status').notNull().default('PENDING'),
+	reference: varchar('reference', { length: 255 }).notNull().unique(),
 
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),

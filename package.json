@@ -9,6 +9,7 @@
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
 		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio",
 		"db:generate": "drizzle-kit generate"
 	},
 	"devDependencies": {

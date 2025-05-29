@@ -1,1 +1,0 @@
-ALTER TABLE "sessions" ALTER COLUMN "refresh_token" SET DATA TYPE varchar;

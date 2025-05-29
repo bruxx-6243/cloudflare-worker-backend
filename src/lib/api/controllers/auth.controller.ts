@@ -23,7 +23,16 @@ export default class AuthController extends BaseController {
 			const validateData = loginSchema.safeParse(data);
 
 			if (!validateData.success) {
-				return this.jsonResponse({ error: 'Validation failed' }, 400);
+				return this.jsonResponse(
+					{
+						error: 'Validation failed',
+						details: validateData.error.errors.map((err) => ({
+							field: err.path.join('.'),
+							message: err.message,
+						})),
+					},
+					400
+				);
 			}
 
 			const { email, password } = validateData.data;
@@ -95,7 +104,16 @@ export default class AuthController extends BaseController {
 			const validateData = registerSchema.safeParse(data);
 
 			if (!validateData.success) {
-				return this.jsonResponse({ error: 'Validation failed' }, 400);
+				return this.jsonResponse(
+					{
+						error: 'Validation failed',
+						details: validateData.error.errors.map((err) => ({
+							field: err.path.join('.'),
+							message: err.message,
+						})),
+					},
+					400
+				);
 			}
 
 			const validData = validateData.data;
