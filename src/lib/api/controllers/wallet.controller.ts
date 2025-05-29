@@ -71,7 +71,7 @@ class WalletController extends BaseController {
 			const { amount, pin } = validateData.data;
 
 			const ref = generateReference(6);
-			const hashPin = await createHash(pin.pin);
+			const hashPin = await createHash(pin);
 
 			const values = {
 				userId,
