@@ -1,11 +1,12 @@
 import BaseController from '@/lib/api/controllers/base.controller';
+import ApiError from '@/lib/api/handlers/api-error';
 import { walletTable } from '@/lib/db/schema';
 import { createHash, generateReference } from '@/lib/utilis';
 import { SessionContext } from '@/types';
 import { createWalletSchema } from '@/types/schemas';
 import { eq } from 'drizzle-orm';
 
-class WalletControler extends BaseController {
+class WalletController extends BaseController {
 	async createWallet(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
 			const contentLength = request.headers.get('content-length');
@@ -55,21 +56,18 @@ class WalletControler extends BaseController {
 
 			return this.jsonResponse({ message: 'Wallet was created' });
 		} catch (error) {
-			console.error('Error in chatWithAI:', error);
-			return this.jsonResponse({ message: 'Internal Server Error' }, 500);
+			return this.handleError(error);
 		}
 	}
 
 	async freezeWallet(request: Request, ctx: SessionContext): Promise<Response> {
-		const req = request.json();
-
+		const req = await request.json(); // Fixed: Added await
 		console.log(req);
-
-		return this.jsonResponse({ message: 'Wallet was freeze' });
+		return this.jsonResponse({ message: 'Wallet was frozen' });
 	}
 
 	async unFreezeWallet(request: Request, ctx: SessionContext): Promise<Response> {
-		return this.jsonResponse({ message: 'Wallet was unfreeze' });
+		return this.jsonResponse({ message: 'Wallet was unfrozen' });
 	}
 
 	async getWallet(_: Request, ctx: SessionContext): Promise<Response> {
@@ -79,21 +77,20 @@ class WalletControler extends BaseController {
 			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
 
 			if (!wallet) {
-				return this.jsonResponse({ message: 'You do not have a wallet' }, 400);
+				throw new ApiError('Wallet not found', 404, undefined, new Response());
 			}
 
 			const { walletPin, userId, ...rest } = wallet;
 
 			return this.jsonResponse({ wallet: rest });
 		} catch (error) {
-			console.error('Error in chatWithAI:', error);
-			return this.jsonResponse({ message: 'Internal Server Error' }, 500);
+			return this.handleError(error);
 		}
 	}
 
 	async deleteWallet(request: Request, ctx: SessionContext): Promise<Response> {
-		return this.jsonResponse({ message: 'wallet infos' });
+		return this.jsonResponse({ message: 'Wallet was deleted' });
 	}
 }
 
-export const { createWallet, freezeWallet, getWallet, unFreezeWallet, deleteWallet } = new WalletControler();
+export const { createWallet, freezeWallet, getWallet, unFreezeWallet, deleteWallet } = new WalletController();
