@@ -87,8 +87,7 @@ class AuthController extends BaseController {
 
 			return response;
 		} catch (error) {
-			console.error('Login error:', error);
-			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
+			return this.handleError(error);
 		}
 	}
 
@@ -172,8 +171,7 @@ class AuthController extends BaseController {
 
 			return response;
 		} catch (error) {
-			console.error('Registration error:', error);
-			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
+			return this.handleError(error);
 		}
 	}
 
@@ -220,8 +218,7 @@ class AuthController extends BaseController {
 
 			return response;
 		} catch (error) {
-			console.error('Refresh error:', error);
-			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
+			return this.handleError(error);
 		}
 	}
 
@@ -239,8 +236,7 @@ class AuthController extends BaseController {
 
 			return this.jsonResponse({ user: rest });
 		} catch (error) {
-			console.error('Profile error:', error);
-			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
+			return this.handleError(error);
 		}
 	}
 
@@ -266,8 +262,7 @@ class AuthController extends BaseController {
 
 			return response;
 		} catch (error) {
-			console.error('Logout error:', error);
-			return this.jsonResponse({ error: 'Internal Server Error' }, 500);
+			return this.handleError(error);
 		}
 	}
 }

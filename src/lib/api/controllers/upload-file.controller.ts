@@ -27,8 +27,7 @@ class UploadFileController extends BaseController {
 				file_url: data.result?.variants[0],
 			});
 		} catch (error) {
-			console.log(error);
-			return this.jsonResponse({ error: 'Upload file failed' }, 500);
+			return this.handleError(error);
 		}
 	}
 }

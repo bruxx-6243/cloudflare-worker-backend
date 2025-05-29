@@ -3,7 +3,13 @@ import { apiKeyAndSecretRouter } from '@/lib/api/routes/api-key.route';
 import { loginRouter, logoutRouter, profileRouter, refreshRouter, registerRouter } from '@/lib/api/routes/auth.route';
 import { logRouter } from '@/lib/api/routes/logs.route';
 import { uploadFileRoute } from '@/lib/api/routes/upload.route';
-import { createWalletRouter, freezeWalletRouter, getWalletRouter } from '@/lib/api/routes/wallet.route';
+import {
+	createWalletRouter,
+	deleteWalletRouter,
+	freezeWalletRouter,
+	getWalletRouter,
+	unFreezeWalletRouter,
+} from '@/lib/api/routes/wallet.route';
 
 import type { Route } from '@/types';
 
@@ -70,6 +76,8 @@ const routes = [
 	getWalletRouter,
 	createWalletRouter,
 	freezeWalletRouter,
+	unFreezeWalletRouter,
+	deleteWalletRouter,
 ];
 
 export default [indexRoute, ...routes.map(withApiPrefix)];

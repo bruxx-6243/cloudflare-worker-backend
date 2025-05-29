@@ -1,5 +1,4 @@
 import BaseController from '@/lib/api/controllers/base.controller';
-import ApiError from '@/lib/api/handlers/api-error';
 import { walletTable } from '@/lib/db/schema';
 import { createHash, generateReference } from '@/lib/utilis';
 import { SessionContext } from '@/types';
@@ -32,12 +31,13 @@ class WalletController extends BaseController {
 					400
 				);
 			}
+
 			const userId = ctx.session.user.id;
 
-			const [hasWallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, userId));
+			const [existingWallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, userId)).limit(1);
 
-			if (hasWallet) {
-				return this.jsonResponse({ message: 'You already have a wallet' }, 400);
+			if (existingWallet && existingWallet.status !== 'DELETED') {
+				return this.jsonResponse({ message: 'You already have a wallet' }, 409);
 			}
 
 			const { amount, pin } = validateData.data;
@@ -50,24 +50,80 @@ class WalletController extends BaseController {
 				walletNumber: ref,
 				walletPin: hashPin,
 				balance: String(amount),
+				status: 'ACTIVE' as const,
 			};
 
-			await ctx.db.insert(walletTable).values(values).returning();
+			if (existingWallet && existingWallet.status === 'DELETED') {
+				await ctx.db.delete(walletTable).where(eq(walletTable.id, existingWallet.id));
+			}
 
-			return this.jsonResponse({ message: 'Wallet was created' });
+			const [newWallet] = await ctx.db.insert(walletTable).values(values).returning();
+
+			return this.jsonResponse(
+				{
+					message: 'Wallet was created',
+					data: {
+						wallet: {
+							id: newWallet.id,
+							walletNumber: newWallet.walletNumber,
+							balance: newWallet.balance,
+							status: newWallet.status,
+							createdAt: newWallet.createdAt,
+							updatedAt: newWallet.updatedAt,
+						},
+					},
+				},
+				201
+			);
 		} catch (error) {
 			return this.handleError(error);
 		}
 	}
 
-	async freezeWallet(request: Request, ctx: SessionContext): Promise<Response> {
-		const req = await request.json(); // Fixed: Added await
-		console.log(req);
-		return this.jsonResponse({ message: 'Wallet was frozen' });
+	async freezeWallet(_: Request, ctx: SessionContext): Promise<Response> {
+		try {
+			const sessionId = ctx.session.user.id;
+
+			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
+
+			if (!wallet) {
+				return this.jsonResponse({ message: 'Wallet not found' }, 404);
+			}
+
+			if (wallet.status === 'FREEZE') {
+				return this.jsonResponse({ message: 'Wallet is already frozen' }, 400);
+			}
+
+			await ctx.db.update(walletTable).set({ status: 'FREEZE' }).where(eq(walletTable.id, wallet.id));
+
+			return this.jsonResponse({ message: 'Wallet was frozen' });
+		} catch (error) {
+			console.error(error);
+			return this.handleError(error);
+		}
 	}
 
-	async unFreezeWallet(request: Request, ctx: SessionContext): Promise<Response> {
-		return this.jsonResponse({ message: 'Wallet was unfrozen' });
+	async unFreezeWallet(_: Request, ctx: SessionContext): Promise<Response> {
+		try {
+			const sessionId = ctx.session.user.id;
+
+			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
+
+			if (!wallet) {
+				return this.jsonResponse({ message: 'Wallet not found' }, 404);
+			}
+
+			if (wallet.status === 'ACTIVE') {
+				return this.jsonResponse({ message: 'Wallet is already active' }, 400);
+			}
+
+			await ctx.db.update(walletTable).set({ status: 'ACTIVE' }).where(eq(walletTable.id, wallet.id));
+
+			return this.jsonResponse({ message: 'Wallet was unfrozen' });
+		} catch (error) {
+			console.error(error);
+			return this.handleError(error);
+		}
 	}
 
 	async getWallet(_: Request, ctx: SessionContext): Promise<Response> {
@@ -77,7 +133,7 @@ class WalletController extends BaseController {
 			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
 
 			if (!wallet) {
-				throw new ApiError('Wallet not found', 404, undefined, new Response());
+				return this.jsonResponse({ message: 'Wallet not found' }, 404);
 			}
 
 			const { walletPin, userId, ...rest } = wallet;
@@ -88,8 +144,27 @@ class WalletController extends BaseController {
 		}
 	}
 
-	async deleteWallet(request: Request, ctx: SessionContext): Promise<Response> {
-		return this.jsonResponse({ message: 'Wallet was deleted' });
+	async deleteWallet(_: Request, ctx: SessionContext): Promise<Response> {
+		try {
+			const sessionId = ctx.session.user.id;
+
+			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
+
+			if (!wallet) {
+				return this.jsonResponse({ message: 'Wallet not found' }, 404);
+			}
+
+			if (wallet.status === 'DELETED') {
+				return this.jsonResponse({ message: 'Wallet is already deleted' }, 400);
+			}
+
+			await ctx.db.update(walletTable).set({ status: 'DELETED' }).where(eq(walletTable.id, wallet.id));
+
+			return this.jsonResponse({ message: 'Wallet was deleted' });
+		} catch (error) {
+			console.error(error);
+			return this.handleError(error);
+		}
 	}
 }
 

@@ -1,4 +1,4 @@
-import { createWallet, freezeWallet, getWallet } from '@/lib/api/controllers/wallet.controller';
+import { createWallet, deleteWallet, freezeWallet, getWallet, unFreezeWallet } from '@/lib/api/controllers/wallet.controller';
 import { authMiddleware } from '@/middlewares';
 import type { Route } from '@/types';
 
@@ -18,10 +18,26 @@ export const getWalletRouter: { route: Route } = {
 	},
 };
 
+export const deleteWalletRouter: { route: Route } = {
+	route: {
+		path: '/wallet',
+		method: 'DELETE',
+		handler: authMiddleware(deleteWallet),
+	},
+};
+
 export const freezeWalletRouter: { route: Route } = {
 	route: {
-		path: '/wallet/:walletId/freeze',
-		method: 'POST',
+		path: '/wallet/freeze',
+		method: 'PUT',
 		handler: authMiddleware(freezeWallet),
+	},
+};
+
+export const unFreezeWalletRouter: { route: Route } = {
+	route: {
+		path: '/wallet/unfreeze',
+		method: 'PUT',
+		handler: authMiddleware(unFreezeWallet),
 	},
 };
