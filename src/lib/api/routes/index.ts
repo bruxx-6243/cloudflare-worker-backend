@@ -4,9 +4,11 @@ import { loginRouter, logoutRouter, profileRouter, refreshRouter, registerRouter
 import { logRouter } from '@/lib/api/routes/logs.route';
 import { uploadFileRoute } from '@/lib/api/routes/upload.route';
 import {
+	changeWalletPinRouter,
 	createWalletRouter,
 	deleteWalletRouter,
 	freezeWalletRouter,
+	getWalletBalanceRouter,
 	getWalletRouter,
 	unFreezeWalletRouter,
 } from '@/lib/api/routes/wallet.route';
@@ -78,6 +80,8 @@ const routes = [
 	freezeWalletRouter,
 	unFreezeWalletRouter,
 	deleteWalletRouter,
+	changeWalletPinRouter,
+	getWalletBalanceRouter,
 ];
 
 export default [indexRoute, ...routes.map(withApiPrefix)];

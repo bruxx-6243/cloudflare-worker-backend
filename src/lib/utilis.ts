@@ -53,8 +53,8 @@ export async function uploadImageToCloudflare(
 	}
 }
 
-export async function comparePassword(password: string, passwordHash: string): Promise<boolean> {
-	return await compare(password, passwordHash);
+export async function compareHash(fullText: string, hashedText: string): Promise<boolean> {
+	return await compare(fullText, hashedText);
 }
 
 export async function createHash(password: string) {

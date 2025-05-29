@@ -2,7 +2,7 @@ import BaseController from '@/lib/api/controllers/base.controller';
 import { sessionsTable, usersTable } from '@/lib/db/schema';
 import emailServices from '@/lib/services/email.service';
 import { ACCESS_TOKEN_DURATION, generateAccessToken, generateRefreshToken, parseCookies, REFRESH_TOKEN_DURATION } from '@/lib/session';
-import { comparePassword, createHash } from '@/lib/utilis';
+import { compareHash, createHash } from '@/lib/utilis';
 import { loginTemplate } from '@/templates/login-template';
 import { registrationTemplate } from '@/templates/register-template';
 import { AppContext, SessionContext } from '@/types';
@@ -42,7 +42,7 @@ class AuthController extends BaseController {
 				return this.jsonResponse({ error: 'Invalid credentials' }, 401);
 			}
 
-			const isValidPassword = await comparePassword(password, user.password);
+			const isValidPassword = await compareHash(password, user.password);
 
 			if (!isValidPassword) {
 				return this.jsonResponse({ error: 'Invalid credentials' }, 401);
