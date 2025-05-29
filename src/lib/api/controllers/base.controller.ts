@@ -40,16 +40,10 @@ export default class BaseController {
 
 		console.error(`Error [${status}]: ${message}`, details || '');
 
-		return new Response(
-			JSON.stringify({
-				error: message,
-				...(details ? { details } : {}),
-			}),
-			{
-				status,
-				headers: { 'Content-Type': 'application/json' },
-			}
-		);
+		return this.jsonResponse({
+			error: message,
+			...(details ? { details } : {}),
+		});
 	}
 
 	protected jsonResponse(data: any, status: number = 200): Response {
