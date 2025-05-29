@@ -53,6 +53,20 @@ export default class BaseController {
 		});
 	}
 
+	protected async verifyRequest(request: Request) {
+		const contentLength = request.headers.get('content-length');
+		if (!contentLength || contentLength === '0') {
+			return this.jsonResponse({ message: 'No data provided' }, 400);
+		}
+
+		const data = await request.json();
+		if (!data || Object.keys(data).length === 0) {
+			return this.jsonResponse({ message: 'No data provided' }, 400);
+		}
+
+		return data;
+	}
+
 	constructor() {
 		Object.getOwnPropertyNames(Object.getPrototypeOf(this))
 			// @ts-expect-error HACK: you can just ignore this warn

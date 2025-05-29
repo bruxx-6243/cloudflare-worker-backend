@@ -1,23 +1,50 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { walletTable } from '@/lib/db/schema';
 import { compareHash, createHash, generateReference } from '@/lib/utilis';
-import { createWalletSchema, pinSchema } from '@/types/schemas';
+import { changePinSchema, createWalletSchema, pinSchema } from '@/types/schemas';
 import { eq } from 'drizzle-orm';
 
 import type { SessionContext } from '@/types';
 
 class WalletController extends BaseController {
+	protected async verifyPin<T>(data: T, ctx: SessionContext) {
+		const validateData = pinSchema.safeParse(data);
+
+		if (!validateData.success) {
+			return this.jsonResponse(
+				{
+					error: 'Validation failed',
+					details: validateData.error.errors.map((err) => ({
+						field: err.path.join('.'),
+						message: err.message,
+					})),
+				},
+				400
+			);
+		}
+
+		const sessionId = ctx.session.user.id;
+
+		const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
+
+		if (!wallet) {
+			return this.jsonResponse({ message: 'Wallet not found' }, 404);
+		}
+
+		const { pin } = validateData.data;
+
+		const isValidPin = await compareHash(pin, wallet.walletPin);
+
+		if (!isValidPin) {
+			return this.jsonResponse({ message: 'Invalid pin' }, 401);
+		}
+
+		return wallet;
+	}
+
 	async createWallet(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
-			const contentLength = request.headers.get('content-length');
-			if (!contentLength || contentLength === '0') {
-				return this.jsonResponse({ message: 'No data provided' }, 400);
-			}
-
-			const data = await request.json();
-			if (!data || Object.keys(data).length === 0) {
-				return this.jsonResponse({ message: 'No data provided' }, 400);
-			}
+			const data = await this.verifyRequest(request);
 
 			const validateData = createWalletSchema.safeParse(data);
 			if (!validateData.success) {
@@ -81,21 +108,20 @@ class WalletController extends BaseController {
 		}
 	}
 
-	async freezeWallet(_: Request, ctx: SessionContext): Promise<Response> {
+	async freezeWallet(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
-			const sessionId = ctx.session.user.id;
+			const data = await this.verifyRequest(request);
+			const result = await this.verifyPin(data, ctx);
 
-			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
-
-			if (!wallet) {
-				return this.jsonResponse({ message: 'Wallet not found' }, 404);
+			if (result instanceof Response) {
+				return result;
 			}
 
-			if (wallet.status === 'FREEZE') {
+			if (result.status === 'FREEZE') {
 				return this.jsonResponse({ message: 'Wallet is already frozen' }, 400);
 			}
 
-			await ctx.db.update(walletTable).set({ status: 'FREEZE' }).where(eq(walletTable.id, wallet.id));
+			await ctx.db.update(walletTable).set({ status: 'FREEZE' }).where(eq(walletTable.id, result.id));
 
 			return this.jsonResponse({ message: 'Wallet was frozen' });
 		} catch (error) {
@@ -104,21 +130,20 @@ class WalletController extends BaseController {
 		}
 	}
 
-	async unFreezeWallet(_: Request, ctx: SessionContext): Promise<Response> {
+	async unFreezeWallet(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
-			const sessionId = ctx.session.user.id;
+			const data = await this.verifyRequest(request);
+			const result = await this.verifyPin(data, ctx);
 
-			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
-
-			if (!wallet) {
-				return this.jsonResponse({ message: 'Wallet not found' }, 404);
+			if (result instanceof Response) {
+				return result;
 			}
 
-			if (wallet.status === 'ACTIVE') {
+			if (result.status === 'ACTIVE') {
 				return this.jsonResponse({ message: 'Wallet is already active' }, 400);
 			}
 
-			await ctx.db.update(walletTable).set({ status: 'ACTIVE' }).where(eq(walletTable.id, wallet.id));
+			await ctx.db.update(walletTable).set({ status: 'ACTIVE' }).where(eq(walletTable.id, result.id));
 
 			return this.jsonResponse({ message: 'Wallet was unfrozen' });
 		} catch (error) {
@@ -145,21 +170,20 @@ class WalletController extends BaseController {
 		}
 	}
 
-	async deleteWallet(_: Request, ctx: SessionContext): Promise<Response> {
+	async deleteWallet(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
-			const sessionId = ctx.session.user.id;
+			const data = await this.verifyRequest(request);
+			const result = await this.verifyPin(data, ctx);
 
-			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
-
-			if (!wallet) {
-				return this.jsonResponse({ message: 'Wallet not found' }, 404);
+			if (result instanceof Response) {
+				return result;
 			}
 
-			if (wallet.status === 'DELETED') {
+			if (result.status === 'DELETED') {
 				return this.jsonResponse({ message: 'Wallet is already deleted' }, 400);
 			}
 
-			await ctx.db.update(walletTable).set({ status: 'DELETED' }).where(eq(walletTable.id, wallet.id));
+			await ctx.db.update(walletTable).set({ status: 'DELETED' }).where(eq(walletTable.id, result.id));
 
 			return this.jsonResponse({ message: 'Wallet was deleted' });
 		} catch (error) {
@@ -170,17 +194,9 @@ class WalletController extends BaseController {
 
 	async changeWalletPin(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
-			const contentLength = request.headers.get('content-length');
-			if (!contentLength || contentLength === '0') {
-				return this.jsonResponse({ message: 'No data provided' }, 400);
-			}
+			const data = await this.verifyRequest(request);
 
-			const data = await request.json();
-			if (!data || Object.keys(data).length === 0) {
-				return this.jsonResponse({ message: 'No data provided' }, 400);
-			}
-
-			const validateData = pinSchema.safeParse(data);
+			const validateData = changePinSchema.safeParse(data);
 
 			if (!validateData.success) {
 				return this.jsonResponse(
@@ -196,12 +212,25 @@ class WalletController extends BaseController {
 			}
 
 			const sessionId = ctx.session.user.id;
-			const { pin } = validateData.data;
-			const hashPin = await createHash(pin);
+			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
 
-			await ctx.db.update(walletTable).set({ walletPin: hashPin }).where(eq(walletTable.userId, sessionId));
+			if (!wallet) {
+				return this.jsonResponse({ message: 'Wallet not found' }, 404);
+			}
 
-			return this.jsonResponse({ message: 'Wallet pin was changed', pin });
+			const { actual_pin, new_pin } = validateData.data;
+
+			const isValidPin = await compareHash(actual_pin, wallet.walletPin);
+
+			if (!isValidPin) {
+				return this.jsonResponse({ message: 'Invalid pin' }, 401);
+			}
+
+			const newHashPin = await createHash(new_pin);
+
+			await ctx.db.update(walletTable).set({ walletPin: newHashPin }).where(eq(walletTable.userId, sessionId));
+
+			return this.jsonResponse({ message: 'Wallet pin was changed' });
 		} catch (error) {
 			return this.handleError(error);
 		}
@@ -209,48 +238,14 @@ class WalletController extends BaseController {
 
 	async getWalletBalance(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
-			const contentLength = request.headers.get('content-length');
-			if (!contentLength || contentLength === '0') {
-				return this.jsonResponse({ message: 'No data provided' }, 400);
+			const data = await this.verifyRequest(request);
+			const result = await this.verifyPin(data, ctx);
+
+			if (result instanceof Response) {
+				return result;
 			}
 
-			const data = await request.json();
-			if (!data || Object.keys(data).length === 0) {
-				return this.jsonResponse({ message: 'No data provided' }, 400);
-			}
-
-			const validateData = pinSchema.safeParse(data);
-
-			if (!validateData.success) {
-				return this.jsonResponse(
-					{
-						error: 'Validation failed',
-						details: validateData.error.errors.map((err) => ({
-							field: err.path.join('.'),
-							message: err.message,
-						})),
-					},
-					400
-				);
-			}
-
-			const sessionId = ctx.session.user.id;
-
-			const [wallet] = await ctx.db.select().from(walletTable).where(eq(walletTable.userId, sessionId));
-
-			if (!wallet) {
-				return this.jsonResponse({ message: 'Wallet not found' }, 404);
-			}
-
-			const { pin } = validateData.data;
-
-			const isValidPin = await compareHash(pin, wallet.walletPin);
-
-			if (!isValidPin) {
-				return this.jsonResponse({ message: 'Invalid pin' }, 401);
-			}
-
-			return this.jsonResponse({ balance: wallet.balance });
+			return this.jsonResponse({ balance: result.balance });
 		} catch (error) {
 			return this.handleError(error);
 		}

@@ -59,3 +59,13 @@ export const createWalletSchema = z.object({
 });
 
 export type CreateWallet = z.infer<typeof createWalletSchema>;
+
+export const changePinSchema = z
+	.object({
+		actual_pin: z.string().length(4, { message: 'Pin must be 4 characters long' }),
+		new_pin: z.string().length(4, { message: 'Pin must be 4 characters long' }),
+	})
+	.refine((data) => data.actual_pin !== data.new_pin, {
+		message: 'New pin must be different from the actual pin',
+		path: ['newPin'],
+	});
