@@ -44,7 +44,7 @@ export function createScret(length: number = 32): string {
 	return result;
 }
 
-export function parseCookies(request: Request) {
+export function parseCookies(request: Request): Record<string, string> {
 	const cookieHeader = request.headers.get('Cookie') ?? '';
 	const cookies: Record<string, string> = {};
 
@@ -76,7 +76,7 @@ export async function verifyToken(token: string, secret: string): Promise<Sessio
 	}
 }
 
-export function generateToken(user: User, secret: string, expiresIn: number) {
+export function generateToken(user: User, secret: string, expiresIn: number): string {
 	const { password, ...rest } = user;
 
 	const token = jwt.sign({ user: rest }, secret, {
