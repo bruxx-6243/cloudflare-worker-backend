@@ -2,7 +2,7 @@ import BaseController from '@/lib/api/controllers/base.controller';
 import { SessionContext } from '@/types';
 import { chatMessageSchema } from '@/types/schemas';
 
-export class AIController extends BaseController {
+class AIController extends BaseController {
 	async chatWithAI(request: Request, ctx: SessionContext): Promise<Response> {
 		try {
 			const contentLength = request.headers.get('content-length');
@@ -17,7 +17,16 @@ export class AIController extends BaseController {
 
 			const validateData = chatMessageSchema.safeParse(data);
 			if (!validateData.success) {
-				return this.jsonResponse({ error: 'Invalid data' }, 400);
+				return this.jsonResponse(
+					{
+						error: 'Validation failed',
+						details: validateData.error.errors.map((err) => ({
+							field: err.path.join('.'),
+							message: err.message,
+						})),
+					},
+					400
+				);
 			}
 
 			const { message } = validateData.data;

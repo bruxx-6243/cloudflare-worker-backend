@@ -1,17 +1,16 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { sessionsTable, usersTable } from '@/lib/db/schema';
 import emailServices from '@/lib/services/email.service';
-import { ACCESS_TOKEN_DURATION, comparePassword, generateAccessToken, generateRefreshToken, REFRESH_TOKEN_DURATION } from '@/lib/session';
-import { parseCookies } from '@/lib/utilis';
+import { ACCESS_TOKEN_DURATION, generateAccessToken, generateRefreshToken, parseCookies, REFRESH_TOKEN_DURATION } from '@/lib/session';
+import { comparePassword, createHash } from '@/lib/utilis';
 import { loginTemplate } from '@/templates/login-template';
 import { registrationTemplate } from '@/templates/register-template';
 import { AppContext, SessionContext } from '@/types';
 import { loginSchema, registerSchema } from '@/types/schemas';
 
-import { hash } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 
-export default class AuthController extends BaseController {
+class AuthController extends BaseController {
 	async login(request: Request, ctx: AppContext): Promise<Response> {
 		try {
 			const contentLength = request.headers.get('content-length');
@@ -127,7 +126,7 @@ export default class AuthController extends BaseController {
 				});
 			}
 
-			const hashedPassword = await hash(validData.password, 10);
+			const hashedPassword = await createHash(validData.password);
 
 			const values = {
 				email: validData.email,

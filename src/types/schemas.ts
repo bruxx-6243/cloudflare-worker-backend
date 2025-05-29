@@ -46,3 +46,10 @@ export const chatMessageSchema = z.object({
 });
 
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
+
+export const createWalletSchema = z.object({
+	amount: z.number().min(10, { message: 'Amount must be at least 10' }),
+	pin: z.string().length(4, { message: 'Pin must be 4 characters long' }),
+});
+
+export type CreateWallet = z.infer<typeof createWalletSchema>;

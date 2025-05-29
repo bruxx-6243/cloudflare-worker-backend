@@ -3,6 +3,8 @@ import { apiKeyAndSecretRouter } from '@/lib/api/routes/api-key.route';
 import { loginRouter, logoutRouter, profileRouter, refreshRouter, registerRouter } from '@/lib/api/routes/auth.route';
 import { logRouter } from '@/lib/api/routes/logs.route';
 import { uploadFileRoute } from '@/lib/api/routes/upload.route';
+import { createWalletRouter, freezeWalletRouter, getWalletRouter } from '@/lib/api/routes/wallet.route';
+
 import type { Route } from '@/types';
 
 const indexRoute: { route: Route } = {
@@ -47,14 +49,27 @@ function withApiPrefix<T extends { route: Route }>(router: T): T {
 
 const routes = [
 	logRouter,
+
+	// Auth routes
 	loginRouter,
 	logoutRouter,
 	profileRouter,
-	chatAIRouter,
 	refreshRouter,
 	registerRouter,
+
+	//Ai routes
+	chatAIRouter,
+
+	// Upload routes
 	uploadFileRoute,
+
+	// Api key routes
 	apiKeyAndSecretRouter,
+
+	// Wallet routes
+	getWalletRouter,
+	createWalletRouter,
+	freezeWalletRouter,
 ];
 
 export default [indexRoute, ...routes.map(withApiPrefix)];

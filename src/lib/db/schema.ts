@@ -4,6 +4,7 @@ export const userRoleEnum = pgEnum('role', ['ADMIN', 'USER']);
 export const userStatusEnum = pgEnum('status', ['ACTIVE', 'INACTIVE', 'DELETED']);
 export const walletStatusEnum = pgEnum('wallet_status', ['ACTIVE', 'FREEZE', 'DELETED']);
 export const transactionStatusEnum = pgEnum('transaction_status', ['SUCCESS', 'FAILED', 'PENDING']);
+export const transactionTypeEnum = pgEnum('transaction_type', ['DEPOSIT', 'TRANSFERT', 'WITHDRAW']);
 
 export const requestLogsTable = pgTable('request_logs', {
 	id: uuid('id').primaryKey().defaultRandom(),
@@ -57,7 +58,8 @@ export const sessionsTable = pgTable('sessions', {
 export const walletTable = pgTable('wallet', {
 	id: uuid('id').primaryKey().defaultRandom(),
 
-	balance: varchar('balance', { length: 255 }).notNull(),
+	balance: varchar('balance', { length: 255 }).notNull().default('0'),
+	walletPin: varchar('wallet_pin', { length: 255 }).notNull(),
 	status: walletStatusEnum('status').notNull().default('ACTIVE'),
 	walletNumber: varchar('wallet_number', { length: 255 }).notNull().unique(),
 
@@ -81,8 +83,10 @@ export const transactionsTable = pgTable('transactions', {
 		.references(() => usersTable.id, { onDelete: 'cascade' }),
 
 	amount: varchar('amount', { length: 255 }).notNull(),
-	status: transactionStatusEnum('status').notNull().default('PENDING'),
 	reference: varchar('reference', { length: 255 }).notNull().unique(),
+
+	status: transactionStatusEnum('status').notNull().default('PENDING'),
+	type: transactionTypeEnum('type').notNull(),
 
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at').notNull().defaultNow(),

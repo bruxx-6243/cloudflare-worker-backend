@@ -1,9 +1,9 @@
 import BaseController from '@/lib/api/controllers/base.controller';
 import { apiKeysTable } from '@/lib/db/schema';
-import { createScret, createSSHKey } from '@/lib/utilis';
+import { createScret, createSSHKey } from '@/lib/session';
 import { SessionContext } from '@/types';
 
-export default class ApiKeyAndSecretController extends BaseController {
+class ApiKeyAndSecretController extends BaseController {
 	async generateApiKeyAndSecret(_: Request, ctx: SessionContext): Promise<Response> {
 		try {
 			const userId = ctx.session.user.id;
