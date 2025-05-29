@@ -53,7 +53,7 @@ export default class BaseController {
 		});
 	}
 
-	protected async verifyRequest(request: Request) {
+	protected async verifyRequest(request: Request): Promise<Response | void | {}> {
 		const contentLength = request.headers.get('content-length');
 		if (!contentLength || contentLength === '0') {
 			return this.jsonResponse({ message: 'No data provided' }, 400);
