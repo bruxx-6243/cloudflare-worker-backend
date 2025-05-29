@@ -1,5 +1,5 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { generateText, streamText } from 'ai'; // Import generateText instead of streamText
+import { generateText, streamText } from 'ai';
 import { z } from 'zod';
 
 const TransactionIntentSchema = z.object({
@@ -35,7 +35,7 @@ export async function askAI(prompt: string): Promise<string> {
 		model: anthropic(model),
 		prompt,
 	});
-  
+
 	let fullText = '';
 	for await (const chunk of response.textStream) {
 		fullText += chunk;
